@@ -1,5 +1,5 @@
 module Stilts
-  class Group < Array
+  class Tree < Array
     attr_reader :tc
     def initialize(tc={})
       @tc=tc
@@ -17,8 +17,8 @@ module Stilts
       where({args: args},&b)
     end
 
-    def with_block(blk,&b)
-      where({blk: blk},&b)
+    def with_block(blk=nil,&b)
+      blk  ? where({blk: blk},&b)   : where(blk: b)
     end
 
     def satisfies(cond=nil,&b)
@@ -29,12 +29,16 @@ module Stilts
       where({xptn: xptn},&b)
     end
 
+    def it
+      calling(:tap).with_block {}
+    end
+
     def returns(v,&b)
       satisfies ->(e){e==v}, &b
     end
 
     def where(h)
-      g=Group.new tc.merge h
+      g=Tree.new tc.merge h 
       yield g if block_given?
       push(g).last
     end

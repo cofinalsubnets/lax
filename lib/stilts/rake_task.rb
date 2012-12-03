@@ -1,40 +1,38 @@
 module Stilts
   class RakeTask
     include Rake::DSL
-    def initialize(runner_opts = {})
+    def initialize(opts = {})
+      dir = opts.delete(:dir) || :test
       runner_opts = {
-          before: Runner::Callback::StartTime,
-          after:  Runner::Callback::StopTime + Runner::Callback::SimpleOut,
-          finish: Runner::Callback::Summary + Runner::Callback::FailList
-      }.merge runner_opts
-      make_tasks runner_opts
+          start:  CB::StartTime,
+          after:  CB::SimpleOut,
+          finish: CB::StopTime + CB::Summary  + CB::FailList
+      }.merge opts
+      make_tasks dir, runner_opts
     end
 
     private
-    def make_tasks(runner_opts)
-      namespace :test do
+    def make_tasks(dir, runner_opts)
+      namespace dir do
         desc "[Stilts] load all test files"
-        task load: make_test_groups
+        task load: make_test_groups(dir)
         desc "[Stilts] run all loaded tests"
-        task(:run) { Stilts.go! runner_opts }
+        task(:run) { Stilts.go runner_opts }
       end
       desc "[Stilts] load and run all tests"
-      task test: %w{test:load test:run}
+      task dir => ["#{dir}:load","#{dir}:run"]
     end
 
-    def make_test_groups
-      tests  = []
-      groups = FileList["test/**/*"].select {|f| File.directory? f}
-      groups.each do |group|
-        tests << name = group.gsub(/\//,?:)
+    def make_test_groups(dir)
+      FileList["#{dir}/**/*"].select {|f| File.directory? f}.map do |group|
+        name = group.sub(/^#{dir}\//,'').gsub(/\//,?:)
         desc "[Stilts] load files in #{group}"
-        task name.sub(/^test:/,'') do
+        task name do
           Dir["#{group}/*.rb"].each {|file| load file }
         end
+        "#{dir}:#{name}"
       end
-      tests
     end
-
   end
 end
 

@@ -1,8 +1,8 @@
-Stilts.group {|assert|
+Stilts.test {|assert|
   assert.calling(:upcase).on('asdf').returns('ASDF')
 }
 
-Stilts.group('asdf') {|test_that|
+Stilts.test('asdf') {|test_that|
   test_that.satisfies {|n| n=='ASDF'}.calling(:upcase)
 }
 
