@@ -1,18 +1,18 @@
 module Stilts
   # Runner for test cases. Handles callbacks, concurrency, etc.
+  # TODO: DRb support!
   class Runner
     attr_reader :cases
     # Takes an array of test cases and an optional hash of options.
     def initialize(cases, opts={})
-      @todo, @cases, @opts = cases, [], {threads: 1}.merge(opts)
+      @cases, @opts = cases, {threads: 1}.merge(opts)
     end
 
     def go
       (start=@opts[:start]) and start[self]
+      todo = @cases.dup
       (1..@opts[:threads]).map do
-        Thread.new do
-          cases << (after run before @todo.shift) while @todo.any?
-        end
+        Thread.new {after run before todo.shift while todo.any?}
       end.each &:join
       (finish=@opts[:finish]) and finish[self]
       self
