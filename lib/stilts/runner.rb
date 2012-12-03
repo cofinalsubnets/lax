@@ -9,10 +9,9 @@ module Stilts
 
     def go
       (start=@opts[:start]) and start[self]
-      mutex = Mutex.new
       (1..@opts[:threads]).map do
         Thread.new do
-          cases << (after run before mutex.synchronize {@todo.shift}) while @todo.any?
+          cases << (after run before @todo.shift) while @todo.any?
         end
       end.each &:join
       (finish=@opts[:finish]) and finish[self]
