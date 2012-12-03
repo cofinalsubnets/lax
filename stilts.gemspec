@@ -9,6 +9,7 @@ Gem::Specification.new do |spec|
   spec.email       = 'feivel@sdf.org'
   spec.files       = FileList['stilts.gemspec','lib/**/*.rb']
   spec.test_files  = FileList['rakefile','test/**/*.rb']
+  spec.license     = 'MIT/X11'
   spec.homepage    = 'http://github.com/gwentacle/stilts'
   spec.summary     = 'An acceptably wobbly testing framework.'
   spec.description = 'A testing framework that tries to stay out of your way.'

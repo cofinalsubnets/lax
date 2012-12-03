@@ -38,3 +38,7 @@ Make It Do It In 30s Or Less
   rake stilts
 ```
 
+License
+=======
+X11. See LICENSE for details.
+
