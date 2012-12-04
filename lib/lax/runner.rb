@@ -20,13 +20,13 @@ module Lax
     private
     def run(c)
       [@opts,c].each {|h| h[:before] and h[:before][c]}
-      begin
-        c[:pass] = c[:cond][c[:value]=c[:obj].__send__(c[:msg],*c[:args],&c[:blk])]
+      c[:pass] = begin
+        c[:cond][c[:value]=c[:obj].__send__(c[:msg],*c[:args],&c[:blk])]
       rescue c[:xptn] => e
-        c[:pass] = true
+        true
       rescue => e
-        c[:pass] = false
         c[:xptn] = e
+        false
       end
       [c,@opts].each {|h| h[:after] and h[:after][c]}
     end

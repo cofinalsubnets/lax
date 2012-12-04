@@ -1,4 +1,4 @@
-Lax.test(1) {|that|
+Lax.test(obj: 1) {|that|
   that.calling(:/).with(0).raises ZeroDivisionError
   that.calling(:**) {|exponentiation|
     exponentiation.with(1).satisfies {|n|n==1}
@@ -29,7 +29,7 @@ Lax.test {|claim|
   claim.calling(:size).on([1,2,3]).satisfies {|n|n==3}
 }
 
-Lax.test(222) {|that|
+Lax.test(obj: 222) {|that|
   that.it.returns 222
 }
 

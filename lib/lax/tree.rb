@@ -9,7 +9,6 @@ module Lax
       where({obj: obj},&b)
     end
 
-
     def calling(msg,&b)
       where({msg: msg},&b)
     end
@@ -52,8 +51,8 @@ module Lax
       push(g).last
     end
 
-    def cases
-      any?? map(&:cases).flatten : [tc]
+    def leaves
+      any?? map(&:leaves).flatten : [tc]
     end
   end
 end

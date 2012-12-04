@@ -1,6 +1,6 @@
 @array = []
 
-Lax.test(@array) {|that|
+Lax.test(obj: @array) {|that|
   that.before {@array << 1}.calling(:size) {|_|
     _.returns 1
     _.returns 2
