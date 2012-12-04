@@ -9,6 +9,7 @@ module Stilts
       where({obj: obj},&b)
     end
 
+
     def calling(msg,&b)
       where({msg: msg},&b)
     end
@@ -23,6 +24,14 @@ module Stilts
 
     def satisfies(cond=nil,&b)
       cond ? where({cond: cond},&b) : where(cond: b)
+    end
+
+    def before(bef=nil,&b)
+      bef ? where({before: bef},&b) : where(before: b)
+    end
+
+    def after(aft=nil,&b)
+      aft ? where({after: aft},&b)  : where(after: b)
     end
 
     def raises(xptn=StandardError,&b)
