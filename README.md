@@ -1,5 +1,5 @@
 lax
----
+===
 A bright smidgen of a testing framework that is not the boss of you.
 ```ruby
   Lax.test { |assert|
@@ -21,7 +21,7 @@ A bright smidgen of a testing framework that is not the boss of you.
   Lax.go
 ```
 yes but why
-===========
+-----------
 * Everything about a test is independently scopeable - methods, arguments, receivers, blocks, expectations, hooks, and any metadata you might care to attach. Testing that one method call satisfies three conditions is as natural as testing that one condition is satisfied by three different method calls. Write tests in whatever way makes sense.
 * No hardcoded constraints on terminal output, handling of failed tests, w/e - it's all done with user-configurable hooks.
 * Support for concurrent testing (via threads - not currently threadsafe in JRuby).
@@ -29,7 +29,7 @@ yes but why
 * Does not pollute your toplevel namespace or infect the entire Ruby object hierarchy with its code.
 
 make it do it
-=============
+-------------
 ```shell
   cd my/project/root
   mkdir -p lax/test
@@ -39,6 +39,6 @@ make it do it
 ```
 
 license
-=======
+-------
 X11. See LICENSE for details.
 
