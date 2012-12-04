@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version     = Stilts::VERSION
   spec.author      = 'feivel jellyfish'
   spec.email       = 'feivel@sdf.org'
-  spec.files       = FileList['stilts.gemspec','lib/**/*.rb']
+  spec.files       = FileList['stilts.gemspec','lib/**/*.rb','README.md','LICENSE']
   spec.test_files  = FileList['rakefile','test/**/*.rb']
   spec.license     = 'MIT/X11'
   spec.homepage    = 'http://github.com/gwentacle/stilts'
