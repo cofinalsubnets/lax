@@ -1,7 +1,7 @@
 module Lax
   class Tree < Array
     attr_reader :tc
-    def initialize(tc={})
+    def initialize(tc)
       @tc=tc
     end
 

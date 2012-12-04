@@ -1,5 +1,6 @@
 require 'lax/version'
 module Lax
+  autoload :Case,   'lax/case'
   autoload :Tree,   'lax/tree'
   autoload :Task,   'lax/task'
   autoload :Runner, 'lax/runner'
@@ -7,7 +8,7 @@ module Lax
   class << self
     @@cases = []
     def test(c={},&b)
-      @@cases += Tree.new(c).tap(&b).leaves
+      @@cases += Tree.new(Case.new.merge c).tap(&b).leaves
     end
 
     def go(runner_opts={})

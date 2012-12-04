@@ -19,16 +19,9 @@ module Lax
 
     private
     def run(c)
-      [@opts,c].each {|h| h[:before] and h[:before][c]}
-      c[:pass] = begin
-        c[:cond][c[:value]=c[:obj].__send__(c[:msg],*c[:args],&c[:blk])]
-      rescue c[:xptn] => e
-        true
-      rescue => e
-        c[:xptn] = e
-        false
-      end
-      [c,@opts].each {|h| h[:after] and h[:after][c]}
+      @opts[:before][c] if @opts[:before]
+      c.run
+      @opts[:after][c] if @opts[:after]
     end
   end
 end
