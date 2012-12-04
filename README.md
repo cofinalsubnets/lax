@@ -1,8 +1,8 @@
-Stilts
-------
-A bright smidgen of a testing framework with the right amount of wobble.
+Lax
+---
+A bright smidgen of a testing framework with the right amount of give.
 ```ruby
-  Stilts.test { |assert|
+  Lax.test { |assert|
     assert.calling(:/).on(1).with(0).raises ZeroDivisionError
 
     assert.satisfies(->(n) { n == 1 }) { |returns_one|
@@ -17,7 +17,7 @@ A bright smidgen of a testing framework with the right amount of wobble.
       }
     }
   }
-  Stilts.go
+  Lax.go
 ```
 
 Features
@@ -32,9 +32,9 @@ Make It Do It In 30s Or Less
 ============================
 ```shell
   cd my/project/root
-  mkdir -p stilts/test
-  echo "Stilts.test {|that| that.calling(:+).on(1).with(99).returns 100}" > stilts/test/test.rb
-  echo "require 'stilts'; Stilts::RakeTask.new(:dir=>'stilts')" >> rakefile
+  mkdir -p lax/test
+  echo "Lax.test {|that| that.calling(:+).on(1).with(99).returns 100}" > lax/test/test.rb
+  echo "require 'lax'; Lax::RakeTask.new(:dir=>'lax')" >> rakefile
   rake stilts
 ```
 

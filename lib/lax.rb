@@ -1,9 +1,9 @@
-require 'stilts/version'
-module Stilts
-  autoload :Tree,     'stilts/tree'
-  autoload :RakeTask, 'stilts/rake_task'
-  autoload :Runner,   'stilts/runner'
-  autoload :CB,       'stilts/cb'
+require 'lax/version'
+module Lax
+  autoload :Tree,     'lax/tree'
+  autoload :RakeTask, 'lax/rake_task'
+  autoload :Runner,   'lax/runner'
+  autoload :CB,       'lax/cb'
   class << self
     @@cases = []
     def test(c={})

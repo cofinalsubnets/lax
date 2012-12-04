@@ -1,4 +1,4 @@
-module Stilts
+module Lax
   class Tree < Array
     attr_reader :tc
     def initialize(tc={})

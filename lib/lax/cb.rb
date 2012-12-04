@@ -1,4 +1,4 @@
-module Stilts
+module Lax
   class CB < Proc
     def <<(cb); CB.new {|e| self[cb[e]]}    end
     def +(cb);  CB.new {|e| self[e]; cb[e]} end

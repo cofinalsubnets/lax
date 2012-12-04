@@ -1,4 +1,4 @@
-module Stilts
+module Lax
   # Runner for test cases. Handles callbacks, concurrency, etc.
   # TODO: DRb support!
   class Runner
