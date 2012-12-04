@@ -2,6 +2,6 @@ $LOAD_PATH << File.expand_path('../lib', __FILE__)
 require 'rake'
 require 'lax'
 
-Lax::RakeTask.new
+Lax::Task.new
 task default: :test
 

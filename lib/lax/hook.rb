@@ -1,22 +1,22 @@
 module Lax
-  class CB < Proc
-    def <<(cb); CB.new {|e| self[cb[e]]}    end
-    def +(cb);  CB.new {|e| self[e]; cb[e]} end
+  class Hook < Proc
+    def <<(cb); Hook.new {|e| self[cb[e]]}    end
+    def +(cb);  Hook.new {|e| self[e]; cb[e]} end
 
-    StartTime = CB.new { @start = Time.now }
-    StopTime  = CB.new { @stop  = Time.now }
+    StartTime = Hook.new { @start = Time.now }
+    StopTime  = Hook.new { @stop  = Time.now }
 
-    SimpleOut = CB.new do |tc|
+    SimpleOut = Hook.new do |tc|
       $stdout.write(tc[:pass] ? "\x1b[32m=\x1b[0m" : "\x1b[31m#\x1b[0m")
     end
 
-    Summary   = CB.new do |rn|
+    Summary   = Hook.new do |rn|
       puts "\nFinished #{(cs=rn.cases).size} tests" <<
         " in #{(@stop - @start).round 10} seconds" <<
         " with #{(fs=cs.select{|c|!c[:pass]}).size} failures"
     end
 
-    FailList  = CB.new do |rn|
+    FailList  = Hook.new do |rn|
       fs = rn.cases.select{|c|!c[:pass]}
       fs.each do |f|
         puts "  #{Module===f[:obj] ? "#{f[:obj]}::" : "#{f[:obj].class}#"}#{f[:msg]}" <<

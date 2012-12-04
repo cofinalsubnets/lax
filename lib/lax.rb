@@ -1,9 +1,9 @@
 require 'lax/version'
 module Lax
-  autoload :Tree,     'lax/tree'
-  autoload :RakeTask, 'lax/rake_task'
-  autoload :Runner,   'lax/runner'
-  autoload :CB,       'lax/cb'
+  autoload :Tree,   'lax/tree'
+  autoload :Task,   'lax/task'
+  autoload :Runner, 'lax/runner'
+  autoload :Hook,   'lax/hook'
   class << self
     @@cases = []
     def test(c={})

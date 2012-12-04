@@ -1,12 +1,12 @@
 module Lax
-  class RakeTask
+  class Task
     include Rake::DSL
     def initialize(opts = {})
       dir = opts.delete(:dir) || :test
       runner_opts = {
-          start:  CB::StartTime,
-          after:  CB::SimpleOut,
-          finish: CB::StopTime + CB::Summary  + CB::FailList
+          start:  Hook::StartTime,
+          after:  Hook::SimpleOut,
+          finish: Hook::StopTime + Hook::Summary  + Hook::FailList
       }.merge opts
       make_tasks dir, runner_opts
     end

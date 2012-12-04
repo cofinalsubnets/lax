@@ -1,6 +1,5 @@
 module Lax
   # Runner for test cases. Handles callbacks, concurrency, etc.
-  # TODO: DRb support!
   class Runner
     attr_reader :cases
     # Takes an array of test cases and an optional hash of options.
