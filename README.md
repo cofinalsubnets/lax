@@ -1,6 +1,6 @@
-Lax
+lax
 ---
-A bright smidgen of a testing framework with the right amount of give.
+A bright smidgen of a testing framework that is not the boss of you.
 ```ruby
   Lax.test { |assert|
     assert.calling(:/).on(1).with(0).raises ZeroDivisionError
@@ -11,6 +11,7 @@ A bright smidgen of a testing framework with the right amount of give.
       returns_one.on(1) { |id_on_one|
         id_on_one.calling(:+).with 0
         id_on_one.calling(:*).with 1
+
         0.upto(10) { |n|
           id_on_one.calling(:**).with n
         }
@@ -19,26 +20,25 @@ A bright smidgen of a testing framework with the right amount of give.
   }
   Lax.go
 ```
-
-Features
-========
-* Everything about a test is scopeable - methods, arguments, receivers, blocks, expectations, hooks, and any metadata you might care to attach. Testing that one method call satisfies three conditions is as natural as testing that one condition is satisfied by three different method calls.
+yes but why
+===========
+* Everything about a test is independently scopeable - methods, arguments, receivers, blocks, expectations, hooks, and any metadata you might care to attach. Testing that one method call satisfies three conditions is as natural as testing that one condition is satisfied by three different method calls. Write tests in whatever way makes sense.
 * No hardcoded constraints on terminal output, handling of failed tests, w/e - it's all done with user-configurable hooks.
-* Support for concurrent testing (via threads).
+* Support for concurrent testing (via threads - not currently threadsafe in JRuby).
 * Code footprint so small, it's hardly there at all (< 200 SLOC).
 * Does not pollute your toplevel namespace or infect the entire Ruby object hierarchy with its code.
 
-Make It Do It In 30s Or Less
-============================
+make it do it
+=============
 ```shell
   cd my/project/root
   mkdir -p lax/test
   echo "Lax.test {|that| that.calling(:+).on(1).with(99).returns 100}" > lax/test/test.rb
   echo "require 'lax'; Lax::RakeTask.new(:dir=>'lax')" >> rakefile
-  rake stilts
+  rake lax
 ```
 
-License
+license
 =======
 X11. See LICENSE for details.
 
