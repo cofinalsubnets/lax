@@ -53,7 +53,7 @@ module Lax
     end
 
     def cases
-      any?? map {|n| n.any? ? n.cases : n.tc}.flatten : [tc]
+      any?? map(&:cases).flatten : [tc]
     end
   end
 end

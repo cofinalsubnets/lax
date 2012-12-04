@@ -15,7 +15,7 @@ module Lax
     def make_tasks(dir, runner_opts)
       namespace dir do
         desc "[Lax] load all test files"
-        task load: make_test_groups(dir)
+        task load: make_groups(dir)
         desc "[Lax] run all loaded tests"
         task(:run) { Lax.go runner_opts }
       end
@@ -23,13 +23,11 @@ module Lax
       task dir => ["#{dir}:load","#{dir}:run"]
     end
 
-    def make_test_groups(dir)
+    def make_groups(dir)
       FileList["#{dir}/**/*"].select {|f| File.directory? f}.map do |group|
         name = group.sub(/^#{dir}\//,'').gsub(/\//,?:)
         desc "[Lax] load files in #{group}"
-        task name do
-          Dir["#{group}/*.rb"].each {|file| load file }
-        end
+        task(name) { Dir["#{group}/*.rb"].each {|file| load file } }
         "#{dir}:#{name}"
       end
     end
