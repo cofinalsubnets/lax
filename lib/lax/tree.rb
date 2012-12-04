@@ -1,8 +1,8 @@
 module Lax
   class Tree < Array
     attr_reader :tc
-    def initialize(tc)
-      @tc=tc
+    def initialize(tc={})
+      @tc = Case.new.merge tc
     end
 
     def on(obj,&b)

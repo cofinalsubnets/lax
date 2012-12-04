@@ -1,5 +1,5 @@
 before = proc {sleep 0.01}
-cases = Lax::Tree.new.tap {|tree|
+cases = Lax::Tree.new(Lax::Case.new).tap {|tree|
   1.upto(100) do |n|
     tree.on(n).it.returns n
   end
