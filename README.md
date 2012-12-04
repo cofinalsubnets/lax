@@ -24,7 +24,7 @@ yes but why
 -----------
 * Everything about a test is independently scopeable - methods, arguments, receivers, blocks, expectations, hooks, and any metadata you might care to attach. Testing that one method call satisfies three conditions is as natural as testing that one condition is satisfied by three different method calls. Write tests in whatever way makes sense.
 * No hardcoded constraints on terminal output, handling of failed tests, w/e - it's all done with user-configurable hooks.
-* Support for concurrent testing (via threads - not currently threadsafe in JRuby).
+* Support for (optional) concurrent testing (via threads - not currently known to be threadsafe in JRuby).
 * Code footprint so small, it's hardly there at all (< 200 SLOC).
 * Does not pollute your toplevel namespace or infect the entire Ruby object hierarchy with its code.
 

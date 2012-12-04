@@ -9,7 +9,7 @@ module Lax
 
     def go
       (start=@opts[:start]) and start[self]
-      todo = @cases.dup
+      todo = cases.dup
       (1..@opts[:threads]).map do
         Thread.new {run todo.shift while todo.any?}
       end.each &:join

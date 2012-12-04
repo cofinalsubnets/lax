@@ -11,22 +11,21 @@ Lax.test { |assert|
   assert.returns(1) { |assert_equal_to_one|
     assert_equal_to_one.on(0).calling(:+).with 1
     assert_equal_to_one.on(1) {|identity_on_one|
-      identity_on_one.calling(:*).with  1
+      identity_on_one.calling(:* ).with 1
       identity_on_one.calling(:**).with 2
-      identity_on_one.calling(:+).with  0
+      identity_on_one.calling(:+ ).with 0
     }
   }
 }
 
-Lax.test {|claim|
-  claim.calling(:object_id).satisfies(->(v){Fixnum===v}) {|_|
+Lax.test(msg: :object_id) {|id|
+  id.satisfies(->(v){Fixnum===v}) {|_|
     _.on 1
     _.on 'asdf'
     _.on String
     _.on Lax
+    _.calling(:size).on([1,2,3])
   }
-
-  claim.calling(:size).on([1,2,3]).satisfies {|n|n==3}
 }
 
 Lax.test(obj: 222) {|that|

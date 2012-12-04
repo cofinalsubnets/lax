@@ -6,7 +6,7 @@ module Lax
       runner_opts = {
           start:  Hook::StartTime,
           after:  Hook::SimpleOut,
-          finish: Hook::StopTime + Hook::Summary  + Hook::FailList
+          finish: Hook::StopTime + Hook::Summary + Hook::FailList
       }.merge opts
       make_tasks dir, runner_opts
     end
@@ -27,8 +27,8 @@ module Lax
       FileList["#{dir}/**/*"].select {|f| File.directory? f}.map do |group|
         name = group.sub(/^#{dir}\//,'').gsub(/\//,?:)
         desc "[Lax] load files in #{group}"
-        task(name) { Dir["#{group}/*.rb"].each {|file| load file } }
-        "#{dir}:#{name}"
+        task(name) { Dir["#{group}/*.rb"].each {|file| load file} }
+        [dir,name]*?:
       end
     end
   end
