@@ -1,6 +1,6 @@
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 require 'rake'
-require 'stilts/version'
+require 'lax/version'
 
 Gem::Specification.new do |spec|
   spec.name        = 'lax'
