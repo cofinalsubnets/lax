@@ -11,7 +11,7 @@ module Lax
       (start=@opts[:start]) and start[self]
       todo = @cases.dup
       (1..@opts[:threads]).map do
-        Thread.new {after run before todo.shift while todo.any?}
+        Thread.new {run todo.shift while todo.any?}
       end.each &:join
       (finish=@opts[:finish]) and finish[self]
       self
@@ -19,6 +19,7 @@ module Lax
 
     private
     def run(c)
+      [@opts,c].each {|h| h[:before] and h[:before][c]}
       begin
         c[:pass] = c[:cond][c[:value]=c[:obj].__send__(c[:msg],*c[:args],&c[:blk])]
       rescue c[:xptn] => e
@@ -27,17 +28,7 @@ module Lax
         c[:pass] = false
         c[:xptn] = e
       end
-      c 
-    end
-
-    def before(c)
-      [@opts,c].each {|h| h[:before] and h[:before][c]}
-      c
-    end
-
-    def after(c)
       [c,@opts].each {|h| h[:after] and h[:after][c]}
-      c
     end
   end
 end
