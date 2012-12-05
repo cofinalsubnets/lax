@@ -1,3 +1,4 @@
+require 'rake'
 module Lax
   class Task
     include Rake::DSL
