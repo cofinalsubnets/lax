@@ -11,6 +11,6 @@ Gem::Specification.new do |spec|
   spec.test_files  = FileList['rakefile','test/**/*.rb']
   spec.license     = 'MIT/X11'
   spec.homepage    = 'http://github.com/gwentacle/lax'
-  spec.summary     = 'A more forgiving testing framework.'
+  spec.summary     = 'An insouciant smidgen of a testing framework.'
   spec.description = 'A testing framework that tries to stay out of your way.'
 end

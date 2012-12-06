@@ -1,7 +1,7 @@
 module Lax
   class Case < Hash
     def run
-      self[:before] and self[:before][self]
+      self[:before][self] if self[:before]
       self[:pass] = begin
         self[:cond][self[:value]=self[:obj].__send__(self[:msg],*self[:args],&self[:blk])]
       rescue self[:xptn] => e
@@ -10,7 +10,8 @@ module Lax
         self[:xptn] = e
         false
       end
-      self[:after] and self[:after][self]
+      self[:after][self] if self[:after]
     end
   end
 end
+

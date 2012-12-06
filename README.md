@@ -1,6 +1,6 @@
 lax
 ===
-A bright smidgen of a testing framework that is not the boss of you.
+A insouciant smidgen of a testing framework that is not the boss of you.
 ```ruby
   Lax.test { |assert|
     assert.calling(:/).on(1).with(0).raises ZeroDivisionError
