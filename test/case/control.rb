@@ -18,14 +18,12 @@ Lax.test { |assert|
   }
 }
 
-Lax.test(msg: :object_id) {|id|
-  id.satisfies(->(v){Fixnum===v}) {|_|
-    _.on 1
-    _.on 'asdf'
-    _.on String
-    _.on Lax
-    _.calling(:size).on([1,2,3])
-  }
+Lax.test(msg: :object_id, cond: ->(v){Fixnum===v}) {|_|
+  _.on 1
+  _.on 'asdf'
+  _.on String
+  _.on Lax
+  _.calling(:size).on([1,2,3])
 }
 
 Lax.test(obj: 222) {|that|

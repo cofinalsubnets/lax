@@ -9,11 +9,11 @@ module Lax
   class << self
     @@cases = []
     def test(c={},&b)
-      @@cases += Tree.new(c).tap(&b).leaves
+      Tree.new(c).tap(&b).leaves.tap{|cs|@@cases+=cs}
     end
 
-    def go(runner_opts={})
-      Runner.new(@@cases, runner_opts).go
+    def go(opts={})
+      Runner.new(opts.delete(:cases) || @@cases, opts).go
     end
   end
 end
