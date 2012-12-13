@@ -1,6 +1,6 @@
 module Lax
   class Case < Hash
-    def run
+    def test
       self[:before][self] if self[:before]
       self[:pass] = begin
         self[:cond][self[:value]=self[:obj].__send__(self[:msg],*self[:args],&self[:blk])]

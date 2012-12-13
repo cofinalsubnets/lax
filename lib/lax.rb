@@ -14,8 +14,22 @@ module Lax
       t.leaves.tap {|cs|@@cases+=cs}
     end
 
-    def go(opts={})
-      Runner.new(opts.delete(:cases) || @@cases, opts).go
+    def test!(opts={})
+      cases = opts[:cases] || @@cases
+      call opts[:start], cases
+      done = cases.map do |c|
+        call opts[:before], c
+        c.test
+        call opts[:after], c
+        c
+      end
+      call opts[:finish], done
+      done
+    end
+
+    private
+    def call(p, *as)
+      p[*as] if Proc===p
     end
   end
 end
