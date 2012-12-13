@@ -22,7 +22,7 @@ module Lax
     end
 
     def satisfies(cond=nil,&b)
-      cond ? where({cond: cond},&b) : where(cond: b)
+      cond ? where({cond: cond},&b) : where(cond: preproc(b))
     end
 
     def before(bef=nil,&b)
@@ -45,14 +45,19 @@ module Lax
       satisfies ->(e){e==v}, &b
     end
 
-    def where(h)
+    def where(h,&b)
       g=Tree.new tc.merge h 
-      yield g if block_given?
+      (b.parameters.any?? b[g] : g.instance_exec(&b)) if b
       push(g).last
     end
 
     def leaves
       any?? map(&:leaves).flatten : [tc]
+    end
+
+    private
+    def preproc(p)
+      p.parameters.any?? p : ->(o) { o.instance_exec &p }
     end
   end
 end

@@ -2,18 +2,18 @@ lax
 ===
 An insouciant smidgen of a testing framework that is not the boss of you.
 ```ruby
-  Lax.test { |assert|
-    assert.calling(:/).on(1).with(0).raises ZeroDivisionError
+  Lax.test {
+    calling(:/).on(1).with(0).raises ZeroDivisionError
 
-    assert.satisfies(->(n) { n == 1 }) { |returns_one|
-      returns_one.calling(:+).on(0).with 1
+    satisfies(->(n) { n == 1 }) {
+      calling(:+).on(0).with 1
 
-      returns_one.on(1) { |id_on_one|
-        id_on_one.calling(:+).with 0
-        id_on_one.calling(:*).with 1
+      on(1) {
+        calling(:+).with 0
+        calling(:*).with 1
 
         0.upto(10) { |n|
-          id_on_one.calling(:**).with n
+          calling(:**).with n
         }
       }
     }

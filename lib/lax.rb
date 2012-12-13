@@ -9,7 +9,9 @@ module Lax
   class << self
     @@cases = []
     def test(c={},&b)
-      Tree.new(c).tap(&b).leaves.tap{|cs|@@cases+=cs}
+      t=Tree.new c
+      b.parameters.any?? b[t] : t.instance_exec(&b)
+      t.leaves.tap {|cs|@@cases+=cs}
     end
 
     def go(opts={})

@@ -6,4 +6,3 @@ Lax.test(obj: 'asdf') {|test_that|
   test_that.satisfies {|n| n=='ASDF'}.calling(:upcase)
 }
 
-
