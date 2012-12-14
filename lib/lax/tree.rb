@@ -37,8 +37,8 @@ module Lax
       where({xptn: xptn},&b)
     end
 
-    def it
-      calling(:tap).with_block {}
+    def it(&b)
+      calling(:tap).with_block proc {}, &b
     end
 
     def returns(v,&b)
