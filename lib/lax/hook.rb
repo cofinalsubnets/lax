@@ -5,7 +5,7 @@ module Lax
 
     StartTime = Hook.new { @start = Time.now }
     StopTime  = Hook.new { @stop  = Time.now }
-    PassFail  = Hook.new {|tc| $stdout.write(tc[:pass] ? "\x1b[32m=\x1b[0m" : "\x1b[31m#\x1b[0m")}
+    PassFail  = Hook.new {|tc| print(tc[:pass] ? "\x1b[32m-\x1b[0m" : "\x1b[31mX\x1b[0m")}
 
     Summary   = Hook.new do |cases|
       puts "\nFinished #{cases.size} tests" <<
