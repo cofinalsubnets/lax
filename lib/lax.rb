@@ -13,13 +13,10 @@ module Lax
 
   def self.test!(cases=self.cases, opts={})
     call opts[:start], cases
-    cases.each do |c|
+    cases.map do |c|
       call opts[:before], c
-      test_case c
-      call opts[:after], c
-    end
-    call opts[:finish], cases
-    cases
+      test_case(c.dup).tap {|c|call opts[:after], c}
+    end.tap {|cs|call opts[:finish], cs}
   end
 
   def self.test_case(tc)
@@ -33,6 +30,7 @@ module Lax
       false
     end
     call tc[:after], tc
+    tc
   end
 
   private
