@@ -30,10 +30,11 @@ yes but why
 make it do it
 -------------
 ```shell
+  gem install lax
   cd my/project/root
   mkdir -p lax/test
-  echo "Lax.test {|that| that.calling(:+).on(1).with(99).returns 100}" > lax/test/test.rb
-  echo "require 'lax'; Lax::RakeTask.new(:dir=>'lax')" >> rakefile
+  echo "Lax.test {calling(:+).on(1).with(99).returns 100}" > lax/test/test.rb
+  echo "require 'lax'; Lax::Task.new(:dir=>'lax')" >> rakefile
   rake lax
 ```
 
