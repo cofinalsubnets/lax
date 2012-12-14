@@ -29,7 +29,6 @@ module Lax
           name = group.sub(/^#{dir}\//,'').gsub(/\//,?:)
           desc "[Lax] load files in #{group}"
           task(name) { Dir["#{group}/*.rb"].each {|file| load file} }
-          [dir,name]*?:
         end
       end
     end
