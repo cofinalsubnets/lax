@@ -1,7 +1,7 @@
 module Lax
   class Hook < Proc
-    def <<(cb); Hook.new {|e| self[cb[e]]}    end
-    def +(cb);  Hook.new {|e| self[e]; cb[e]} end
+    def <<(cb); Hook.new {|e| call cb[e]}    end
+    def +(cb);  Hook.new {|e| call e; cb[e]} end
 
     StartTime = Hook.new { @start = Time.now }
     StopTime  = Hook.new { @stop  = Time.now }
