@@ -1,6 +1,4 @@
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 require 'lax'
-
-Lax::Task.new
-task default: :test
+task default: Lax::Task.new
 
