@@ -2,34 +2,34 @@ require 'lax/version'
 module Lax
   autoload :Case,   'lax/case'
   autoload :Tree,   'lax/tree'
-  autoload :Runner, 'lax/runner'
   autoload :Hook,   'lax/hook'
   autoload :Task,   'lax/task'
 
   class << self
     @@cases = []
     def test(c={},&b)
-      t=Tree.new c
-      b.parameters.any?? b[t] : t.instance_exec(&b)
+      preproc(b)[t=Tree.new(c)]
       t.leaves.tap {|cs|@@cases+=cs}
     end
 
     def test!(opts={})
       cases = opts[:cases] || @@cases
       call opts[:start], cases
-      done = cases.map do |c|
+      cases.each do |c|
         call opts[:before], c
         c.test
         call opts[:after], c
-        c
       end
-      call opts[:finish], done
-      done
+      call opts[:finish], cases
+      cases
     end
 
-    private
     def call(p, *as)
-      p[*as] if Proc===p
+      p[*as] if p
+    end
+
+    def preproc(p)
+      p.parameters.any?? p : ->(o) { o.instance_exec &p }
     end
   end
 end

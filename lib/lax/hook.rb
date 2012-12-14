@@ -5,7 +5,6 @@ module Lax
 
     StartTime = Hook.new { @start = Time.now }
     StopTime  = Hook.new { @stop  = Time.now }
-
     SimpleOut = Hook.new {|tc| $stdout.write(tc[:pass] ? "\x1b[32m=\x1b[0m" : "\x1b[31m#\x1b[0m")}
 
     Summary   = Hook.new do |cases|
@@ -22,3 +21,4 @@ module Lax
     end
   end
 end
+
