@@ -6,8 +6,8 @@ module Lax
       dir = opts.delete(:dir) || :test
       make_tasks dir, {
         start:  Hook::StartTime,
-        after:  Hook::SimpleOut,
-        finish: Hook::StopTime + Hook::Summary + Hook::FailList
+        after:  Hook::PassFail,
+        finish: Hook::StopTime + Hook::Summary + Hook::Failures
       }.merge(opts)
     end
 
