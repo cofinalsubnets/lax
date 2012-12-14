@@ -24,7 +24,7 @@ yes but why
 -----------
 * Everything about a test is independently scopeable - methods, arguments, receivers, blocks, expectations, hooks, and any metadata you might care to attach. Testing that one method call satisfies three conditions is as natural as testing that one condition is satisfied by three different method calls. Write tests in whatever way makes sense.
 * No hardcoded constraints on terminal output, handling of failed tests, w/e - it's all done with user-configurable hooks.
-* Code footprint so small, it's hardly there at all (< 200 SLOC).
+* Code footprint so small, it's hardly there at all (< 150 SLOC).
 * Does not pollute your toplevel namespace or infect the entire Ruby object hierarchy with its code.
 
 make it do it
@@ -34,7 +34,7 @@ make it do it
   cd my/project/root
   mkdir -p lax/test
   echo "Lax.test {calling(:+).on(1).with(99).returns 100}" > lax/test/test.rb
-  echo "require 'lax'; Lax::Task.new(:dir=>'lax')" >> rakefile
+  echo "require 'lax'; Lax::Task.new(dir: :lax)" >> rakefile
   rake lax
 ```
 

@@ -17,7 +17,7 @@ module Lax
         desc "[Lax] load all test files"
         task load: make_groups(dir)
         desc "[Lax] run all loaded tests"
-        task(:run) { Lax.test! opts }
+        task(:run) { Lax.test! Lax.cases, opts }
       end
       desc "[Lax] load and run all tests"
       task dir => ["#{dir}:load","#{dir}:run"]

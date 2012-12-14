@@ -11,8 +11,7 @@ module Lax
     Tree.new.where(c,&b).leaves.tap {|cs|self.cases+=cs}
   end
 
-  def self.test!(opts={})
-    cases = opts[:cases] || self.cases
+  def self.test!(cases=self.cases, opts={})
     call opts[:start], cases
     cases.each do |c|
       call opts[:before], c
