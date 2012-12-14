@@ -12,5 +12,5 @@ Gem::Specification.new do |spec|
   spec.license     = 'MIT/X11'
   spec.homepage    = 'http://github.com/gwentacle/lax'
   spec.summary     = 'An insouciant smidgen of a testing framework.'
-  spec.description = 'A testing framework that tries to stay out of your way.'
+  spec.description = 'A lightweight testing framework that is not the boss of you.'
 end
