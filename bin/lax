@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require 'lax'
+ARGV.any?? ARGV.each {|f| load f} : exit(-1)
+Lax.test_all
+

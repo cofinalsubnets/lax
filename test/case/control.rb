@@ -1,32 +1,43 @@
-Lax.test(obj: 1) {|that|
-  that.calling(:/).with(0).raises ZeroDivisionError
-  that.calling(:**) {|exponentiation|
-    exponentiation.with(1).satisfies {|n|n==1}
-    exponentiation.with(2).satisfies ->(n){n==1}
-  }
-}
+ Lax.test {
+  # a test is a subject and a condition
+  subject {1}.condition {odd?}
 
-Lax.test {
-  calling(:/).on(1).with(0).raises ZeroDivisionError
-  returns(1) {
-    on(0).calling(:+).with 1
-    on(1) {
-      calling(:* ).with 1
-      calling(:**).with 2
-      calling(:+ ).with 0
+  # s and c are aliases
+  s{2}.c{even?}
+
+  # there are a couple of condition helpers
+  subject {1**7} == 1
+  subject {'no'} =~ /no+/
+
+  # the subject is the implicit condition
+  subject {'asdf'.is_a? String}
+
+  # subjects and conditions can be passed into blocks using `_'
+  _ c{even?} { on {2} }
+
+  # and this is where things get fancy
+  _ subject {'AsDf'.downcase} {
+    it == 'asdf'
+    it != 'qsdf'
+
+    it {is_a? String}
+
+    its {size}   == 4
+    its {upcase} == 'ASDF'
+
+    _ its {upcase} {
+      its {size} == 4
+      it == 'ASDF'
     }
   }
-}
+  _ equals {1} {
+    s {1+0}
+  }
 
-Lax.test(msg: :object_id, cond: ->(v){Fixnum===v}) {
-  on 1
-  on 'asdf'
-  on String
-  on Lax
-  calling(:size).on([1,2,3])
-}
+  c{is_a? Fixnum}.on *(1..5)
 
-Lax.test(obj: 222) {|that|
-  that.it.returns 222
+  _ subject {1/0} {
+    x ZeroDivisionError
+  }
 }
 

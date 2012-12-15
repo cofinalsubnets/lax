@@ -7,10 +7,12 @@ Gem::Specification.new do |spec|
   spec.version     = Lax::VERSION
   spec.author      = 'feivel jellyfish'
   spec.email       = 'feivel@sdf.org'
-  spec.files       = FileList['lax.gemspec','lib/**/*.rb','README.md','LICENSE']
+  spec.files       = FileList['lax.gemspec','bin/**/*','lib/**/*','README.md','LICENSE']
   spec.test_files  = FileList['rakefile','test/**/*.rb']
+  spec.bindir      = 'bin'
+  spec.executables << 'lax'
   spec.license     = 'MIT/X11'
   spec.homepage    = 'http://github.com/gwentacle/lax'
   spec.summary     = 'An insouciant smidgen of a testing framework.'
-  spec.description = 'A lightweight testing framework that is not the boss of you.'
+  spec.description = 'A lightweight testing framework.'
 end

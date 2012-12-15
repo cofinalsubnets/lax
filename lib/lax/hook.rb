@@ -5,19 +5,16 @@ module Lax
 
     StartTime = Hook.new { @start = Time.now }
     StopTime  = Hook.new { @stop  = Time.now }
-    PassFail  = Hook.new {|tc| print(tc[:pass] ? "\x1b[32m-\x1b[0m" : "\x1b[31mX\x1b[0m")}
+    PassFail  = Hook.new {|tc| print(tc.pass ? "\x1b[32m-\x1b[0m" : "\x1b[31mX\x1b[0m")}
 
     Summary   = Hook.new do |cases|
       puts "\nFinished #{cases.size} tests" <<
         " in #{(@stop - @start).round 10} seconds" <<
-        " with #{(cases.reject{|c|c[:pass]}).size} failures"
+        " with #{cases.reject(&:pass).size} failures"
     end
 
     Failures  = Hook.new do |cases|
-      cases.reject {|c|c[:pass]}.each do |f|
-        puts "  #{Module===f[:obj] ? "#{f[:obj]}::" : "#{f[:obj].class}#"}#{f[:msg]}" <<
-          "#{?(+[*f[:args]]*', '+?) if f[:args]} " << (f.has_key?(:value) ? "#=> #{f[:value]}" : "raised unhandled #{f[:xptn].class}")
-      end
+      cases.reject(&:pass).each {|f| puts "  #{f.source}"}
     end
   end
 end

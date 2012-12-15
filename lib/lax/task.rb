@@ -5,31 +5,19 @@ module Lax
       include Rake::DSL
       def new(opts = {})
         dir = opts.delete(:dir) || :test
-        make_tasks dir, {
-          start:  Hook::StartTime,
-          after:  Hook::PassFail,
-          finish: Hook::StopTime + Hook::Summary + Hook::Failures
-        }.merge(opts)
+        make_tasks dir, opts
       end
 
       private
       def make_tasks(dir, opts)
-        namespace dir do
-          desc "[Lax] load all test files"
-          task load: make_groups(dir)
-          desc "[Lax] run all loaded tests"
-          task(:run) { Lax.test! Lax.cases, opts }
+        namespace :lax do
+          desc "load test files"
+          task(:load) {Dir["#{dir}/**/*.rb"].each {|f| load f}}
+          desc "run all loaded tests"
+          task(:run) { Lax.test_all opts }
         end
-        desc "[Lax] load and run all tests"
-        task dir => ["#{dir}:load","#{dir}:run"]
-      end
-
-      def make_groups(dir)
-        FileList["#{dir}/**/*"].select {|f| File.directory? f}.map do |group|
-          name = group.sub(/^#{dir}\//,'').gsub(/\//,?:)
-          desc "[Lax] load files in #{group}"
-          task(name) { Dir["#{group}/*.rb"].each {|file| load file} }
-        end
+        desc "load and run all tests"
+        task lax: %w{lax:load lax:run}
       end
     end
   end

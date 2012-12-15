@@ -1,30 +1,42 @@
 lax
 ===
-An insouciant smidgen of a testing framework that is not the boss of you.
+Lax is an insouciant smidgen of a testing framework that strives to be a nigh-on-invisible wrapper around your ideas about how your code should work. Accordingly, while Lax accommodates a fairly descriptive, semantic style:
+```ruby
+  class MyTests < Lax::Group
+    def tests
+      let subject {'asdf'} do
+        it {is_a? String}
+        it satisfies {|s| s.size == 4}
+      end
+    end
+  end
+```
+it prefers a much terser one:
 ```ruby
   Lax.test {
-    calling(:/).on(1).with(0).raises ZeroDivisionError
+    s {999} < 1000
 
-    returns(1) {
-      calling(:+).on(0).with 1
+    _ s{1/0} {
+      x StandardError
+      x ZeroDivisionError
+    }
 
-      on(1) {
-        calling(:+).with 0
-        calling(:*).with 1
+    _ s{'test'} {
+      it =~ /t/
+      its {size} == 4
 
-        0.upto(10) { |n|
-          calling(:**).with n
-        }
+      _ its {upcase} {
+        c{size == 4}
+        it == 'TEST'
       }
     }
   }
-  Lax.test!
 ```
 yes but why
 -----------
-* Everything about a test is independently scopeable - methods, arguments, receivers, blocks, expectations, hooks, and any metadata you might care to attach. Testing that one method call satisfies three conditions is as natural as testing that one condition is satisfied by three different method calls. Write tests in whatever way makes sense.
+* No bullshit legalese.
 * No hardcoded constraints on terminal output, handling of failed tests, w/e - it's all done with user-configurable hooks.
-* Code footprint so small, it's hardly there at all (< 150 SLOC).
+* Code footprint so small it's hardly there (< 150 SLOC).
 * Does not pollute your toplevel namespace or infect the entire Ruby object hierarchy with its code.
 
 make it do it
@@ -32,9 +44,15 @@ make it do it
 ```shell
   gem install lax
   cd my/project/root
-  mkdir -p lax/test
-  echo "Lax.test {calling(:+).on(1).with(99).returns 100}" > lax/test/test.rb
-  echo "require 'lax'; Lax::Task.new(dir: :lax)" >> rakefile
+  # write yr tests in test/dir/whatever/whocares.rb
+```
+Lax ships with a minimal executable:
+```shell
+  lax test/dir/my_test.rb
+```
+but it's easier to use & customize if you run it inside of Rake:
+```ruby
+  echo "require 'lax'; Lax::Task.new(dir: 'test/dir')" >> rakefile
   rake lax
 ```
 
