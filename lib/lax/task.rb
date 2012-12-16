@@ -4,20 +4,17 @@ module Lax
     class << self
       include Rake::DSL
       def new(opts = {})
-        dir = opts.delete(:dir) || :test
-        make_tasks dir, opts
+        dir  = opts.delete(:dir) || :test
+        make_task dir, {after: Hook.pass_fail}.merge(opts)
       end
-
       private
-      def make_tasks(dir, opts)
-        namespace :lax do
-          desc "load test files"
-          task(:load) {Dir["#{dir}/**/*.rb"].each {|f| load f}}
-          desc "run all loaded tests"
-          task(:run) { Lax.test_all opts }
+      def make_task(dir, opts)
+        task :lax do
+          Dir["#{dir}/**/*.rb"].each {|f| load f}
+          results = []
+          multitask(run: Lax.groups.map {|g| task {results << g.test(opts)}}).invoke
+          (Hook.summary+Hook.failures)[results.flatten]
         end
-        desc "load and run all tests"
-        task lax: %w{lax:load lax:run}
       end
     end
   end

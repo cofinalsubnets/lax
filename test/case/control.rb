@@ -1,22 +1,22 @@
  Lax.test {
   # a test is a subject and a condition
-  subject {1}.condition {odd?}
+  s{1}.c{odd?}
 
   # s and c are aliases
   s{2}.c{even?}
 
   # there are a couple of condition helpers
-  subject {1**7} == 1
-  subject {'no'} =~ /no+/
+  s{1**7} == 1
+  s{'no'} =~ /no+/
 
   # the subject is the implicit condition
-  subject {'asdf'.is_a? String}
+  s{'asdf'.is_a? String}
 
   # subjects and conditions can be passed into blocks using `_'
   _ c{even?} { on {2} }
 
   # and this is where things get fancy
-  _ subject {'AsDf'.downcase} {
+  _ s{'AsDf'.downcase} {
     it == 'asdf'
     it != 'qsdf'
 
@@ -30,13 +30,13 @@
       it == 'ASDF'
     }
   }
-  _ equals {1} {
+  _ eq{1} {
     s {1+0}
   }
 
   c{is_a? Fixnum}.on *(1..5)
 
-  _ subject {1/0} {
+  _ s{1/0} {
     x ZeroDivisionError
   }
 }

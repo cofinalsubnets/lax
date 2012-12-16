@@ -5,12 +5,15 @@ module Lax
       begin
         @value = subject.call
       rescue exception => e
-        return @pass = true
+        @pass = true
+        return self
       rescue => e
         @pass = false
-        return self.exception = e
+        self.exception = e
+        return self
       end
       @pass = condition.call @value
+      self
     end
   end
 end
