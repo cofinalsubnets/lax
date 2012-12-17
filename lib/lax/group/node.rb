@@ -18,7 +18,7 @@ module Lax
       def c(&b); push(Node.new @subj, preproc(b)       ).last end
       def x(e=StandardError); push(Node.new @subj, e   ).last end
 
-      def it(t=nil, &b); b ? c(&b) : t ? self : @subj.call    end
+      def it(t=nil, &b); b ? c(&b) : self                     end
       def its(&b); s { @subj.call.instance_exec &b }          end
       def on(*subs, &b); b ? s(&b) : subs.each {|sub| s{sub}} end
       def eq(o=nil,&b); self == (b ? b.call : o)              end

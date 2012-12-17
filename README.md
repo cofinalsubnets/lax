@@ -40,13 +40,6 @@ make it do it
   gem install lax
   cd my/project/root
   # write yr tests in test/dir/whatever/whocares.rb
-```
-Lax ships with a minimal executable:
-```shell
-  lax test/dir/my_test.rb
-```
-but it's easier to use & customize if you run it inside of Rake:
-```ruby
   echo "require 'lax'; Lax::Task.new(dir: 'test/dir')" >> rakefile
   rake lax
 ```
