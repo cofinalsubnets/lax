@@ -1,6 +1,6 @@
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 require 'lax'
 Lax.hook(:repl) {|c| c.pass or (require 'pry';binding.pry)}
-Lax.config[:task][:group][:after]+=:repl
+Lax.config[:runner][:group][:after]+=:repl
 task default: Lax::Task.new
 

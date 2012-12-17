@@ -3,12 +3,12 @@ module Lax
     include Hook::Run
     autoload :Node, 'lax/group/node'
     autoload :Case, 'lax/group/case'
-    USER = []
+    DEFS = []
     def self.define(hooks, spec)
       group = Class.new(self)
       group.const_set :HOOKS, hooks
       group.const_set :SPEC,  spec
-      (USER << group).last
+      (DEFS << group).last
     end
 
     attr_reader :cases

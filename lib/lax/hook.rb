@@ -1,6 +1,7 @@
 module Lax
   class Hook < Proc
     class << self
+      def id; new {|i|i} end
       def pass_fail
         new {|tc|print(tc.pass ? "\x1b[32m-\x1b[0m" : "\x1b[31mX\x1b[0m")}
       end
@@ -17,10 +18,18 @@ module Lax
       def define(sym, &p)
         define_singleton_method(sym) {new &p}
       end
+
+      def _compose(p1,p2)
+        new {|*a,&b|p1[p2[*a,&b]]}
+      end
+
+      def _append(p1,p2)
+        new {|*a,&b| p1[*a,&b];p2[*a,&b]}
+      end
     end
 
-    def <<(cb); Hook.new {|e| call h(cb)[e]}    end
-    def +(cb);  Hook.new {|e| call e; h(cb)[e]} end
+    def <<(cb); Hook._compose self, h(cb) end
+    def +(cb);  Hook._append self,  h(cb) end
 
     private
     def h(cb)

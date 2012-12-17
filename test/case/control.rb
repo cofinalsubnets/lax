@@ -12,15 +12,12 @@
   # the subject is the implicit condition
   s{'asdf'.is_a? String}
 
-  # subjects and conditions can be passed into blocks using `_'
-  _ c{even?} { on {2} }
-
   # and this is where things get fancy
   _ s{'AsDf'.downcase} {
     it == 'asdf'
     it != 'qsdf'
 
-    it {is_a? String}
+    kind_of? String
 
     its {size}   == 4
     its {upcase} == 'ASDF'
@@ -30,11 +27,6 @@
       it == 'ASDF'
     }
   }
-  _ eq{1} {
-    s {1+0}
-  }
-
-  c{is_a? Fixnum}.on *(1..5)
 
   _ s{1/0} {
     x ZeroDivisionError

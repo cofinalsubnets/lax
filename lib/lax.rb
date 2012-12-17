@@ -4,6 +4,7 @@ module Lax
   autoload :Hook,   'lax/hook'
   autoload :Task,   'lax/task'
   autoload :Config, 'lax/config'
+  autoload :Runner, 'lax/runner'
   extend Config
   def self.test(hooks={},&b)
     Group.define hooks, b

@@ -9,12 +9,11 @@ module Lax
       end
       private
       def make_task(opts)
-        task :lax do
-          Dir["#{opts[:dir]}/**/*.rb"].each {|f| load f}
-          results = []
-          multitask(run: Lax::Group::USER.map {|g| task {results << g.new(opts[:group]).test}}).invoke
-          opts[:finish][results.flatten] if opts[:finish]
+        namespace :lax do
+          task(:load) { Dir["#{opts[:dir]}/**/*.rb"].each {|f| load f} }
+          task(:run)  { Lax::Runner.new.go }
         end
+        task lax: %w{lax:load lax:run}
       end
     end
   end

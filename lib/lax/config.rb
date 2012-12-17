@@ -1,7 +1,7 @@
 module Lax
   CONFIG = {
-    task: {
-      dir: :test,
+    task: { dir: :test },
+    runner: {
       finish: Hook.summary + Hook.failures,
       group: {
         after: Hook.pass_fail
@@ -11,7 +11,7 @@ module Lax
   module Config
     def recursive_merge(h1, h2)
       h1.merge(h2) do |k,o,n|
-        Hash===o ? recursive_merge(o,n) :n
+        Hash===o ? recursive_merge(o,n) : n
       end
     end
     def config(h=nil)
