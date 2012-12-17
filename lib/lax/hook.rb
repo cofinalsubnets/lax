@@ -13,9 +13,32 @@ module Lax
       def failures
         new {|cs| cs.reject(&:pass).each {|f| puts "  #{f.src*?:}"}}
       end
+
+      def define(sym, &p)
+        define_singleton_method(sym) {new &p}
+      end
     end
-    def <<(cb); Hook.new {|e| call cb[e]}    end
-    def +(cb);  Hook.new {|e| call e; cb[e]} end
+
+    def <<(cb); Hook.new {|e| call h(cb)[e]}    end
+    def +(cb);  Hook.new {|e| call e; h(cb)[e]} end
+
+    private
+    def h(cb)
+      Symbol===cb ? Hook.send(cb) : cb
+    end
+
+    module Run
+      attr_reader :hooks
+      private
+      def around(init=nil, h1=:before, h2=:after)
+        run_hook h1, init
+        yield.tap{|v|run_hook h2,v}
+      end
+
+      def run_hook(h,*a)
+        hooks[h][*a] if hooks[h]
+      end
+    end
   end
 end
 

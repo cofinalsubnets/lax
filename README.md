@@ -1,6 +1,6 @@
 lax
 ===
-Lax is an insouciant smidgen of a testing framework that tries to be a nigh-invisible wrapper around your ideas about how your code should work. Its syntax is accordingly terse:
+Lax is an insouciant smidgen of a testing framework that tries to be an invisible wrapper around your ideas about how your code should work. Its syntax is accordingly terse:
 ```ruby
   Lax.test {
     # s for subject
@@ -19,7 +19,7 @@ Lax is an insouciant smidgen of a testing framework that tries to be a nigh-invi
       its {size} == 4
 
       _ its {upcase} {
-        # c for condition (although numerous helpers exist, as we have seen)
+        # c for condition (although numerous helpers exist - see above)
         c{size == 4}
         it == 'TEST'
       }
@@ -29,6 +29,7 @@ Lax is an insouciant smidgen of a testing framework that tries to be a nigh-invi
 yes but why
 -----------
 * No bullshit legalese.
+* Designed to be friendly to use interactively.
 * No hardcoded constraints on terminal output, handling of failed tests, w/e - it's all done with user-configurable hooks.
 * Code footprint so small it's hardly there (< 150 SLOC).
 * Does not pollute your toplevel namespace or infect the entire Ruby object hierarchy with its code.
