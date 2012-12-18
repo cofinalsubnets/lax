@@ -6,11 +6,12 @@ Lax.test {
       its {call} == 2
     }
   }
-  _ s {Lax::Hook.new {|n|2*n}}.c {call(2) == 4} {
-    its {self}
-    its {self << proc {2}}
-    Lax.hook(:two) {2}
-    its {self << :two}
-  }
+  let subject {Lax::Hook.new {|n|2*n}} do
+    let condition {call(2) == 4} do
+      its {self << proc {2}}
+      Lax.hook(:two) {2}
+      its {self << :two}
+    end
+  end
 }
 

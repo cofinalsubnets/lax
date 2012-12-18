@@ -1,21 +1,21 @@
 module Lax
-  CONFIG = {
-    task: { dir: :test },
-    runner: {
-      finish: Hook.summary + Hook.failures,
-      group: {
-        after: Hook.pass_fail
-      }
-    }
-  }
+  # Configuration module for Lax.
   module Config
-    def recursive_merge(h1, h2)
-      h1.merge(h2) do |k,o,n|
-        Hash===o ? recursive_merge(o,n) : n
-      end
+    require 'lax/config/config_hash'
+    def self.included(klass)
+      klass.extend ClassMethods
+      klass.const_set :CONFIG, ConfigHash.new
     end
-    def config(h=nil)
-      h ? CONFIG.merge!(recursive_merge(CONFIG, h)) : CONFIG
+
+    module ClassMethods
+      # Accessor for the config hash.
+      def config(h=nil)
+        h ? self::CONFIG.merge!(ConfigHash.from h) : self::CONFIG
+      end
+
+      def defaults(key, h)
+        self::CONFIG[key].dup.merge!(h)
+      end
     end
   end
 end

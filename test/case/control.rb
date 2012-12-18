@@ -1,4 +1,4 @@
- ControlTests = Lax.test {
+ Control = Lax.test {
   # a test is a subject and a condition
   s{1}.c{odd?}
 

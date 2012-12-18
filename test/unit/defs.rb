@@ -1,7 +1,11 @@
 Lax.hook(:pug_bomb) {|n| Array.new n, 'pug'}
-Lax.matcher(:factor) {|n| proc {|o| n%o==0}}
+Lax.matcher(:divides) {|n| proc {|o| n%o==0}}
 Lax.test {
-  s{Lax::Hook.pug_bomb[5]} == Array.new(5, 'pug')
-  s{5}.factor 25
+  let subject {Lax::Hook.pug_bomb[5]} do
+    it == Array.new(5, 'pug')
+  end
+  let subject {5} do
+    it.divides 25
+  end
 }
 

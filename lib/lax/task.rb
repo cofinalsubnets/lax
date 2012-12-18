@@ -4,11 +4,7 @@ module Lax
     class << self
       include Rake::DSL
       def new(opts = {})
-        opts = Lax.recursive_merge(Lax.config[:task], opts)
-        make_task opts
-      end
-      private
-      def make_task(opts)
+        opts = Lax.defaults :task, opts
         namespace :lax do
           task(:load) { Dir["#{opts[:dir]}/**/*.rb"].each {|f| load f} }
           task(:run)  { Lax::Runner.new.go }
