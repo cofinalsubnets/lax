@@ -1,6 +1,6 @@
 lax
 ===
-Lax is an insouciant smidgen of a testing framework that tries to be an invisible wrapper around your ideas about how your code should work.
+Lax is an insouciant smidgen of a testing framework that tries hard to be an invisible wrapper around your ideas about how your code works.
 ```ruby
 Lax.assert do
   let number: 1,
@@ -23,8 +23,9 @@ how come lax is neat
 --------------------
 * Minimal legalese.
 * Easy-to-define custom matchers and hooks.
+* Built-in Rake task generator for quick setup.
 * Hackable with a tiny code footprint (< 300 SLOC).
-* Does not work by infecting the entire Ruby object hierarchy with its code.
+* Does not work by infecting the entire object system with its code. Neighbourly!
 
 how to make it do it
 --------------------
@@ -32,7 +33,7 @@ how to make it do it
   gem install lax
   cd my/project/root
   echo "require 'lax/rake_task'; Lax::RakeTask.new" >> Rakefile
-  # write yr tests in the test directory (default test)
+  # write tests in yr test directory (defaults to 'test')
   rake lax
 ```
 
