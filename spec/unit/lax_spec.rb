@@ -1,19 +1,19 @@
 require 'spec_helper'
 
 describe Lax do
-  subject { Lax }
+  let(:lax) { Class.new(Lax) }
 
   describe '::let' do
     before do
-      Lax.let number: 1
-      Lax.number == 1
+      lax.let number: 1
+      lax.number == 1
     end
-    subject { Lax.instance_methods - Lax.superclass.instance_methods }
+    subject { lax.instance_methods - Lax.instance_methods }
     it { should have(1).thing }
   end
 
   describe '#initialize' do
-    subject { Lax.reboot.new }
+    subject { lax.new }
     it { should be_empty }
   end
 end
