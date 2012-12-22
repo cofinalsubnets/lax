@@ -237,7 +237,7 @@ class Lax < Array
       (stderr, $stderr = $stderr, StringIO.new) if suppress_warning
       Object.const_set :Lax, Class.new(Array)
       Lax.const_set :SOURCE, SOURCE
-      Object.class_eval SOURCE
+      Object.class_eval SOURCE, __FILE__
       ($stderr = stderr) if suppress_warning
       Lax
     end
