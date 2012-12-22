@@ -1,21 +1,36 @@
 module Lax
-  # Configuration module for Lax.
-  module Config
-    require 'lax/config/config_hash'
-    def self.included(klass)
-      klass.extend ClassMethods
-      klass.const_set :CONFIG, ConfigHash.new
+  module Fixture
+    def self.new(hash)
+      klass = Struct.new(*hash.keys)
+      klass.send :include, self
+      klass.new *hash.values
     end
 
-    module ClassMethods
-      # Accessor for the config hash.
-      def config(h=nil)
-        h ? self::CONFIG.merge!(ConfigHash.from h) : self::CONFIG
+    module Hashable
+      def self.new(hashable)
+        hash = hashable.to_hash
+        klass = Struct.new(*hash.keys)
+        klass.send :include, self, Fixture
+        klass.new(*hash.values.map do |val|
+          (Hash===val) ? new(val) : val
+        end)
       end
 
-      def defaults(key, h)
-        self::CONFIG[key].dup.merge!(h)
+      def to_hash
+        Hash[
+          members.zip entries.map {|e| e.kind_of?(Hashable) ? e.to_hash : e }
+        ]
       end
+
+      def merge(hashable)
+        Hashable.new to_hash.merge hashable
+      end
+    end
+  end
+
+  module Config
+    def self.new(hash)
+      Fixture::Hashable.new(hash)
     end
   end
 end

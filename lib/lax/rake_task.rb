@@ -10,7 +10,7 @@ module Lax
       # containing the files for Lax to load (defaults to 'test' - this can
       # also be configured through Lax.config).
       def new(opts = {})
-        opts = Lax.defaults :task, opts
+        opts = Lax.config.task.merge opts
         namespace :lax do
           task(:load) { Dir["./#{opts[:dir]}/**/*.rb"].each {|f| load f} }
           task(:run) do

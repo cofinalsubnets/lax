@@ -13,4 +13,5 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'http://github.com/gwentacle/lax'
   spec.summary     = 'An insouciant smidgen of a testing framework.'
   spec.description = 'A lightweight testing framework.'
+  spec.add_development_dependency 'rspec'
 end

@@ -1,39 +1,59 @@
 require 'lax/version'
-require 'lax/config'
 module Lax
-  include Config
-  autoload :Group,    'lax/group'
-  autoload :Hook,     'lax/hook'
+  autoload :Fixture, 'lax/config'
+  autoload :Assertion, 'lax/assertion'
+  autoload :Tree, 'lax/tree'
+  autoload :Hook, 'lax/hook'
   autoload :RakeTask, 'lax/rake_task'
   autoload :Runner,   'lax/runner'
+  autoload :CattrAssertable, 'lax/cattr_assertable'
 
-  config(
+
+
+  CONFIG = Fixture::Hashable.new(
     task: { dir: :test },
-    test_case: {
-      after: Hook.output
+    assertion: {
+      hooks: {
+        before: Hook.noop,
+        after: Hook.output
+      }
     },
     runner: {
       threads: 0,
-      finish: Hook.summary + Hook.failures,
+      hooks: { 
+        before: Hook.noop,
+        after:  Hook.summary
+      }
     }
   )
 
-  # Start a test block. Accepts an optional hash of default hooks. See
-  # TestGroup::define for more information.
-  def self.test(hooks={}, &b)
-    Group.define defaults(:group, hooks), b
+  def self.config
+    CONFIG
   end
 
-  # Define a matcher. Takes a symbol and an optional block. See
-  # TestGroup::define_matcher for more information.
-  def self.matcher(sym, &b)
-    Group::Node::DSL.define_matcher sym, &b
+  def self.configure
+    yield config
   end
 
-  # Define a hook. Takes a symbol and a block. See Hook::define for more
-  # information.
-  def self.hook(sym, &b)
+  def self.assert(&spec)
+    Assertion::Node.assert &spec
+  end
+
+  def self.define_matcher(sym, &b)
+    Assertion::Subject.define_matcher sym, &b
+  end
+
+  def self.define_hook(sym, &b)
     Hook.define sym, &b
+  end
+
+  def self.register(group)
+    assertion_groups << group
+    group
+  end
+
+  def self.assertion_groups
+    ASSERTION_GROUPS
   end
 end
 

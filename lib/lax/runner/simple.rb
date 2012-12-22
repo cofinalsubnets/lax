@@ -7,11 +7,12 @@ module Lax
     class Simple
       include Runner
       def run
-        around_hook(@groups, :start, :finish) do
-          @groups.map do |group|
-            around_hook(g=group.new) {g.execute}
-          end.flatten
-        end
+        hooks.before.call self
+        hooks.after.call(@groups.flat_map do |group|
+          group.new.flat_map do |node|
+            node.assertions.map &:validate
+          end
+        end)
       end
     end
   end

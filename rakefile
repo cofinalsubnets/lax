@@ -1,8 +1,19 @@
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 require 'lax'
+require 'rspec/core/rake_task'
 require 'pry'
-Lax.hook(:repl) {|c| c.pass or binding.pry}
-Lax.config.group.after += :repl
-Lax.config.runner.threads = 0
+
+RSpec::Core::RakeTask.new 'spec'
+
+Lax.define_hook(:repl) {|c| c.pass? or binding.pry}
+Lax.configure do |conf|
+  conf.assertion.hooks.after += :repl
+  conf.runner.threads = 0
+end
+
 task default: Lax::RakeTask.new
+
+task(:unit) do
+  Dir['./test/test_unit/**/*.rb'].each {|file| ruby file}
+end
 
