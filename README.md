@@ -21,10 +21,10 @@ Lax::Run[ Lax ] #=> pass, pass, pass
 ```
 how come lax is neat
 --------------------
-* Minimal bullshit legalese.
+* Minimal legalese.
 * Easy-to-define custom matchers and hooks.
 * Hackable with a tiny code footprint (< 300 SLOC).
-* Does not pollute your toplevel namespace or infect the entire Ruby object hierarchy with its code.
+* Does not work by infecting the entire Ruby object hierarchy with its code.
 
 how to make it do it
 --------------------
