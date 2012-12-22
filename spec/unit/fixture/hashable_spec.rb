@@ -5,7 +5,7 @@ describe Lax::Fixture::Hashable do
   let(:config) { Lax::Fixture::Hashable.new hash }
 
   describe '::new' do
-    specify { ->{Lax::Config.new}.should raise_error ArgumentError }
+    specify { ->{Lax::Fixture::Hashable.new}.should raise_error ArgumentError }
     specify { [:name, :fears].each {|msg| config.should respond_to msg } }
     specify { config.name.should == 'phyllis' }
     specify { config.fears.should be_a_kind_of Lax::Fixture::Hashable }
