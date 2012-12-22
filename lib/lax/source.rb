@@ -86,7 +86,7 @@ class Lax < Array
 
     def self.define_predicate(sym)
       if sym =~ /(.*)(\?|_?p)$/
-        define_method($1) { satisfies($1) {|o| o.__send__ sym} }
+        define_method($1) {|*a,&b| satisfies($1) {|o| o.__send__ sym,*a,&b} }
       else
         raise ArgumentError, "#{sym} does not appear to be a predicate"
       end
