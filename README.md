@@ -5,7 +5,7 @@ Lax is an insouciant smidgen of a testing framework that tries to be an invisibl
 Lax.assert do
   let number: 1,
       string: 'Hi There',
-      regexp: defer{ /the/ } # for lazy evaluation
+      regexp: defer{ /the/ } # lazy evaluation
 
   number + 1 == 2
   string.downcase =~ regexp

@@ -1,6 +1,6 @@
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 require 'rake'
-require 'lax/version'
+require 'lax'
 
 Gem::Specification.new do |spec|
   spec.name        = 'lax'
@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.author      = 'feivel jellyfish'
   spec.email       = 'feivel@sdf.org'
   spec.files       = FileList['lax.gemspec','lib/**/*','README.md','LICENSE']
-  spec.test_files  = FileList['rakefile','test/**/*.rb']
+  spec.test_files  = FileList['test/**/*.rb','spec/**/*.rb']
   spec.license     = 'MIT/X11'
   spec.homepage    = 'http://github.com/gwentacle/lax'
   spec.summary     = 'An insouciant smidgen of a testing framework.'
