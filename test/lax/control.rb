@@ -12,5 +12,5 @@ Lax.assert do
       string.upcase.downcase == 'asdf'
     end
   end
-
 end
+

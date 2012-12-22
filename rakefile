@@ -5,7 +5,7 @@ require 'pry'
 
 RSpec::Core::RakeTask.new 'spec'
 
-Lax.define_hook(:repl) {|c| c.pass? or binding.pry}
+Lax.hook(:repl) {|c| c.pass? or binding.pry}
 Lax.configure do |conf|
   conf.assertion.hooks.after += :repl
   conf.runner.threads = 0

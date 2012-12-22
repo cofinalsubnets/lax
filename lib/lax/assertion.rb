@@ -1,8 +1,5 @@
-module Lax
+class Lax
   class Assertion < Struct.new :name, :subject, :condition, :src, :matcher, :args, :hooks
-    autoload :Node,  'lax/assertion/node'
-    autoload :Root, 'lax/assertion/root'
-    autoload :Subject, 'lax/assertion/subject'
 
     def pass?
       memoize(:pass) { condition.call value }

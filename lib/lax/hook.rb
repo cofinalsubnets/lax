@@ -1,24 +1,7 @@
-module Lax
+class Lax
   # Proc with methods for composing and appending instances, and a facility
   # dynamically defining and retrieving callbacks.
   class Hook < Proc
-
-    module Util
-      class << self
-        def compose(p1,p2)
-          Hook.new {|*a,&b|p1.call p2.call(*a,&b)}
-        end
-
-        def append(p1,p2)
-          Hook.new {|*a,&b| p1.call *a,&b;p2.call *a,&b}
-        end
-
-        def conjoin(p1,p2)
-          Hook.new {|*a,&b| p1.call(*a,&b) and p2.call(*a,&b)}
-        end
-      end
-    end
-
     class << self
       def _resolve(hook)
         if hook.is_a? Hook
@@ -30,11 +13,6 @@ module Lax
         else
           raise ArgumentError, "Unable to resolve hook `#{hook}'"
         end
-      end
-
-      # Returns a hook implementing the identity function.
-      def id
-        new {|i|i}
       end
 
       def noop
@@ -71,21 +49,12 @@ module Lax
       end
     end
 
-    # Composition. hook can be a Proc (or similar) or a symbol naming a
-    # defined hook (i.e. a class method on Hook that returns a Hook).
     def <<(hook)
-      Hook::Util.compose self, Hook._resolve(hook)
+      Hook.new {|*a,&b| call(Hook._resolve(hook)[*a,&b])}
     end
 
-    # Returns a new hook that takes arbitrary parameters, then calls the
-    # receiver and the argument sequentially with those parameters. As with
-    # #<<, the argument can be a Proc or a symbol.
     def +(hook)
-      Hook::Util.append self, Hook._resolve(hook)
-    end
-
-    def &(hook)
-      Hook::Util.conjoin self, Hook._resolve(hook)
+      Hook.new {|*a,&b| call(*a,&b); Hook._resolve(hook)[*a,&b]}
     end
   end
 end

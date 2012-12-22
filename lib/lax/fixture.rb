@@ -1,4 +1,4 @@
-module Lax
+class Lax
   module Fixture
     def self.new(hash)
       klass = Struct.new(*hash.keys)
@@ -28,10 +28,5 @@ module Lax
     end
   end
 
-  module Config
-    def self.new(hash)
-      Fixture::Hashable.new(hash)
-    end
-  end
 end
 

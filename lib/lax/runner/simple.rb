@@ -1,4 +1,4 @@
-module Lax
+class Lax
   module Runner
     # Runner for single-threaded deterministic execution of tests. Initialized
     # by Runner::new if the :threads parameter is less than or equal to zero
@@ -7,12 +7,9 @@ module Lax
     class Simple
       include Runner
       def run
-        hooks.before.call self
-        hooks.after.call(@groups.flat_map do |group|
-          group.new.flat_map do |node|
-            node.assertions.map &:validate
-          end
-        end)
+        assertions = Lax.flat_map {|l| l.new.assertions}
+        hooks.before.call assertions
+        hooks.after.call  assertions.map(&:validate)
       end
     end
   end

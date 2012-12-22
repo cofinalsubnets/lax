@@ -1,4 +1,4 @@
-module Lax
+class Lax
   module Runner
     # Runner for concurrent tests, capable of pausing and resuming execution.
     # Initialized by Runner::new if the :threads parameter is greater than

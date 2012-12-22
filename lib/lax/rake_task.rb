@@ -1,5 +1,5 @@
 require 'rake'
-module Lax
+class Lax
   # Helper for running Lax as a Rake task.
   module RakeTask
     class << self
