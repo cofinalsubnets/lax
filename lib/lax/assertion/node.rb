@@ -1,6 +1,8 @@
 module Lax
   class Assertion
-    class Node < Tree
+    class Node
+      include Tree
+      attr_reader :parent, :children
 
       def initialize(parent=nil)
         @parent   = parent
