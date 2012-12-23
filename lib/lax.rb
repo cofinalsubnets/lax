@@ -172,14 +172,15 @@ class Lax < Array
 
       # Returns a hook for generating terminal output from test cases.
       def summary
-        new {|cs| puts "\nFinished #{cs.size} tests with #{cs.reject(&:pass?).size} failures"}
+        new {|cs| puts "Finished #{cs.size} tests with #{cs.reject(&:pass?).size} failures"}
       end
 
       # Returns a hook for generating terminal output from test cases.
       def failures
         new do |cs|
+          puts
           cs.reject(&:pass?).each do |f|
-            puts "\n  in #{f.node.docstring or 'an undocumented node'} at #{f.src.split(/:in/).first}"
+            puts "  in #{f.node.docstring or 'an undocumented node'} at #{f.src.split(/:in/).first}"
             puts "    an assertion on #{f.target} failed#{" to satisfy #{f.matcher}(#{f.args.join ', '})" if f.matcher}"
             Assertion::Xptn === f ?
               puts("    with an unhandled #{f.exception.class}: #{f.exception.message}"):
