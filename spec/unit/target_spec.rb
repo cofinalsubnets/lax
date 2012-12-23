@@ -16,7 +16,7 @@ describe Lax::Target do
       subject { node.new.first }
       it { should be_an_instance_of Lax::Assertion  }
       its(:subject) { should be_an_instance_of Proc }
-      its(:name)    { should == :num  }
+      its(:target)  { should == :num  }
       its(:matcher) { should == '=='  }
       its(:pass?)   { should == false }
     end

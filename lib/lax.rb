@@ -1,7 +1,7 @@
 class Lax < Array
   VERSION = '0.2.2'
 
-  class Assertion < Struct.new :name, :subject, :condition, :src, :matcher, :args, :hooks
+  class Assertion < Struct.new :target, :subject, :condition, :src, :matcher, :args, :node
     def pass?
       memoize(:pass) { condition.call value }
     end
@@ -12,9 +12,9 @@ class Lax < Array
 
     def validate
       memoize(:validate) do
-        hooks.before.call self
+        node.hooks.before.call self
         pass?
-        self.tap { hooks.after.call self }
+        self.tap { node.hooks.after.call self }
       end
     end
 
@@ -25,7 +25,7 @@ class Lax < Array
     end
 
     class Xptn < Struct.new :assertion, :exception
-      attr_accessor :name, :src, :matcher, :args
+      attr_accessor :target, :src, :matcher, :args, :node
 
       def pass?
         false
@@ -37,7 +37,7 @@ class Lax < Array
 
       def initialize(a, x)
         super
-        %w{name src matcher args}.each {|m| send "#{m}=", a.send(m)}
+        %w{target src matcher args node}.each {|m| send "#{m}=", a.send(m)}
       end
     end
   end
@@ -113,11 +113,11 @@ class Lax < Array
 
     private
     def assert!(cond, matcher=nil, args=nil)
-      name, subj, src, hooks = @name, @subj, @src, @node.hooks
+      name, subj, src, node = @name, @subj, @src, @node
       ord = @node.instance_methods.size.to_s
       @node.send(:include, ::Module.new do
         define_method(ord) do
-          ::Lax::Assertion.new name, subj, cond, src, matcher, args, hooks
+          ::Lax::Assertion.new name, subj, cond, src, matcher, args, node
         end
       end)
     end
@@ -179,10 +179,11 @@ class Lax < Array
       def failures
         new do |cs|
           cs.reject(&:pass?).each do |f|
-            puts "  #{f.src}\n    " <<
-              "#{f.exception ?
-                "(raised an unhandled #{f.exception.class})" :
-                "(got #{f.subject})"}"
+            puts "\n  in #{f.node.docstring or 'an undocumented node'} at #{f.src.split(/:in/).first}"
+            puts "    an assertion on #{f.target} failed#{" to satisfy #{f.matcher}(#{f.args.join ', '})" if f.matcher}"
+            Assertion::Xptn === f ?
+              puts("    with an unhandled #{f.exception.class}: #{f.exception.message}"):
+              puts("    with its return value: #{f.value}")
           end
         end
       end
@@ -214,7 +215,7 @@ class Lax < Array
         start:  Hook.noop,
         before: Hook.noop,
         after:  Hook.output,
-        finish: Hook.summary
+        finish: Hook.failures + Hook.summary
       }
     }
   )
@@ -231,7 +232,7 @@ class Lax < Array
   extend Enumerable
 
   class << self
-    attr_accessor :hooks, :children
+    attr_accessor :hooks, :children, :docstring
 
     def config
       block_given? ? yield(CONFIG) : CONFIG
@@ -268,8 +269,11 @@ class Lax < Array
       Fixture.new(hash)
     end
 
-    def assert(*vals, &b)
-      Class.new(self).tap {|node| node.class_eval(&b)}
+    def assert(doc=nil, &b)
+      Class.new(self).tap do |node|
+        node.docstring = doc
+        node.class_eval(&b)
+      end
     end
   end
 
