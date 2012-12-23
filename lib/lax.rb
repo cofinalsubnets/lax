@@ -20,21 +20,11 @@ class Lax < Array
 
     private
     def memoize(key)
-      @memo ||= {}
-      @memo.has_key?(key) ? @memo[key] : @memo[key] = yield
+      (@memo||={}).has_key?(key) ? @memo[key] : @memo[key] = yield
     end
 
-    class Xptn < Struct.new :assertion, :exception
+    class Xptn < Struct.new :assertion, :exception, :pass?, :value
       attr_accessor :target, :src, :matcher, :args, :node
-
-      def pass?
-        false
-      end
-
-      def value
-        nil
-      end
-
       def initialize(a, x)
         super
         %w{target src matcher args node}.each {|m| send "#{m}=", a.send(m)}
@@ -60,9 +50,7 @@ class Lax < Array
       end
 
       def to_hash
-        Hash[
-          members.zip entries.map {|e| e.kind_of?(Hashable) ? e.to_hash : e }
-        ]
+        Hash[ members.zip entries.map {|e| e.kind_of?(Hashable) ? e.to_hash : e } ]
       end
 
       def merge(hashable)
@@ -218,8 +206,7 @@ class Lax < Array
     }
   )
 
-  @hooks = CONFIG.node
-  @children, @targets = [], {}
+  @hooks, @children, @targets = CONFIG.node, [], {}
 
   def self.inherited(child)
     @children << child
@@ -273,7 +260,6 @@ class Lax < Array
         node.class_eval(&b)
       end
     end
-    alias _ assert
   end
 
   def initialize
