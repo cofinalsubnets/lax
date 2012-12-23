@@ -10,14 +10,24 @@ Lax.assert do
   number + 1 == 2
   string.downcase =~ regexp
 
-  assert do
+  assert 'documented tests' do  # named assertion groups
     let number: 2
     number - 1 == 1
+    string.upcase == 'HI THERE' # string is in scope
+
+    let nothing: regexp.match('ffff') # compound targets
+    nothing == nil
   end
+
+  let lax: self
+  lax.respond_to?(:bool) == false # bool is out of scope
+
+  let open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+  open_file.read.lines.map(&:strip).size == 4
+
 end
 
-Lax::Run[ Lax ] #=> pass, pass, pass
-
+Lax::Run[ Lax ] #=> green dots aww yeah
 ```
 how come lax is neat
 --------------------

@@ -28,3 +28,28 @@ Lax.assert do
   end
 end
 
+Lax.assert do
+  let number: 1,
+      string: 'Hi There',
+      regexp: defer{ /the/ } # lazy evaluation
+
+  number + 1 == 2
+  string.downcase =~ regexp
+
+  assert 'documented tests' do  # named assertion groups
+    let number: 2
+    number - 1 == 1
+    string.upcase == 'HI THERE' # string is in scope
+
+    let nothing: regexp.match('ffff') # compound targets are allowed
+    nothing == nil
+  end
+
+  let lax: self
+  lax.respond_to?(:bool) == false # bool is out of scope
+
+  let open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+  open_file.read.lines.map(&:strip).size == 4
+
+end
+

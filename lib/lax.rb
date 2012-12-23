@@ -23,8 +23,10 @@ class Lax < Array
       (@memo||={}).has_key?(key) ? @memo[key] : @memo[key] = yield
     end
 
-    class Xptn < Struct.new :assertion, :exception, :pass?, :value
+    class Xptn < Struct.new :assertion, :exception
       attr_accessor :target, :src, :matcher, :args, :node
+      def pass?; nil end
+      def value; nil end
       def initialize(a, x)
         super
         %w{target src matcher args node}.each {|m| send "#{m}=", a.send(m)}
