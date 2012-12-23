@@ -9,7 +9,11 @@ class Lax
         namespace o[:name] do
           task(:load) { Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f} }
           task(:run) do
-            Lax::Run[ Lax ]
+            Lax.config do |lax|
+              lax.run.hooks.after = Hook.output
+              lax.run.hooks.finish = Hook.failures + Hook.summary
+            end
+            Run[ Lax ]
           end
         end
         task o[:name] => ["#{o[:name]}:load", "#{o[:name]}:run"]

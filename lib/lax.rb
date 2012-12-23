@@ -215,8 +215,8 @@ class Lax < Array
       hooks: { 
         start:  Hook.noop,
         before: Hook.noop,
-        after:  Hook.output,
-        finish: Hook.failures + Hook.summary
+        after:  Hook.noop,
+        finish: Hook.noop
       }
     }
   )
