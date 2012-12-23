@@ -27,7 +27,7 @@ Lax.assert do
 
 end
 
-Lax::Run[ Lax ] #=> green dots aww yeah
+Lax.go #=> green dots aww yeah
 ```
 how come lax is neat
 --------------------

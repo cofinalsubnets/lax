@@ -36,7 +36,13 @@ Lax.assert do
   number + 1 == 2
   string.downcase =~ regexp
 
+#  before { puts "i am a callback" }
+#  after  { puts "and also" }
+
   assert 'documented tests' do  # named assertion groups
+#    before { puts "callbacks are scoped like targets" }
+#    after  { puts "are stackable" }
+
     let number: 2
     number - 1 == 1
     string.upcase == 'HI THERE' # string is in scope
@@ -44,6 +50,7 @@ Lax.assert do
     let nothing: regexp.match('ffff') # compound targets are allowed
     nothing == nil
   end
+
 
   let lax: self
   lax.respond_to?(:bool) == false # bool is out of scope

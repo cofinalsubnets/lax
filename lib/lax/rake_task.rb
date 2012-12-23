@@ -13,7 +13,7 @@ class Lax
               lax.run.after  += Hook.output
               lax.run.finish += Hook.failures + Hook.summary
             end
-            Run[ Lax ]
+            Lax.validate
           end
         end
         task o[:name] => ["#{o[:name]}:load", "#{o[:name]}:run"]

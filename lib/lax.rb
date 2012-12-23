@@ -1,4 +1,4 @@
-class Lax < Array
+class Lax
   VERSION = '0.2.2'
 
   class Assertion < Struct.new :target, :subject, :condition, :src, :matcher, :args, :node
@@ -66,17 +66,17 @@ class Lax < Array
       define_method(sym) do |*a,&b|
         p ? 
           satisfies(sym) do |o|
-            p[*a.map {|v| resolve v},&b][o]
+            p[*rslv(a),&b][o]
           end :
           satisfies(sym,*a) do |o|
-            o.__send__ sym,*a.map {|v| resolve v},&b
+            o.__send__ sym,*rslv(a),&b
           end
       end
     end
 
     def self.define_predicate(sym)
       if sym =~ /(.*)(\?|_?p)$/
-        define_method($1) {|*a,&b| satisfies($1) {|o| o.__send__ sym,*a,&b} }
+        define_method($1) {|*a,&b| satisfies($1) {|o| o.__send__ sym,*rslv(a),&b} }
       else
         raise ArgumentError, "#{sym} does not appear to be a predicate"
       end
@@ -86,7 +86,7 @@ class Lax < Array
     %w{odd? even? is_a? kind_of? include?}.each {|m| define_predicate m}
 
     def initialize(node, subj, name, src)
-      @node, @subj, @init, @name, @src = node, subj, subj, name, src 
+      @node, @subj, @name, @src = node, subj, name, src 
     end
 
     def satisfies(matcher=nil, *args, &cond)
@@ -94,8 +94,7 @@ class Lax < Array
     end
 
     def method_missing(sym, *args, &blk)
-      s, @subj = @subj, ->{s.call.__send__ sym, *args, &blk}
-      self
+      ::Lax::Target.new @node, ->{@subj.call.__send__ sym, *rslv(args), &blk}, @name, @src
     end
 
     def __val__
@@ -104,40 +103,15 @@ class Lax < Array
 
     private
     def assert!(cond, matcher=nil, args=nil)
-      name, subj, src, node, @subj = @name, @subj, @src, @node, @init
-      ord = @node.instance_methods.size.to_s
-      @node.send(:include, ::Module.new do
-        define_method(ord) do
-          ::Lax::Assertion.new name, subj, cond, src, matcher, args, node
-        end
-      end)
+      @node.asserts << ::Lax::Assertion.new(@name, @subj, cond, @src, matcher, args, @node)
     end
 
-    def resolve(v)
-      ::Lax::Target === v ? v.__val__ : v
+    def rslv(vs)
+      vs.map {|v| ::Lax::Target === v ? v.__val__ : v}
     end
 
   end
 
-  module Run
-    def self.[](lax)
-      hook = lax.config.run
-      hook.start[ as = lax.map(&:new).flatten ]
-      as.map do |assertion|
-        hook.before[ assertion ]
-        validate_protect(assertion).tap {|v| hook.after[v]}
-      end.tap {|vs| hook.finish[vs]}
-    end
-
-    private
-    def self.validate_protect(a)
-      begin
-        a.validate
-      rescue => e
-        Assertion::Xptn.new(a, e)
-      end
-    end
-  end
 
   class Hook < Proc
     class << self
@@ -199,19 +173,19 @@ class Lax < Array
     }
   )
 
-  @hooks, @lings, @targets = CONFIG.node, [], {}
+  @hooks, @lings, @asserts = CONFIG.node, [], []
 
   def self.inherited(ling)
     @lings << ling
     ling.hooks   = @hooks.dup
     ling.lings   = []
-    ling.targets = {}
+    ling.asserts = []
   end
 
   extend Enumerable
 
   class << self
-    attr_accessor :hooks, :lings, :doc, :targets
+    attr_accessor :hooks, :lings, :doc, :asserts
 
     def config
       block_given? ? yield(CONFIG) : CONFIG
@@ -242,7 +216,7 @@ class Lax < Array
       h.each do |key, value|
         val = (Hook===value) ? value : (Target===value) ? defer{value.__val__} : ->{value}
         define_singleton_method(key) do
-          @targets[key] ||= Target.new(self, val, key, caller[0])
+          Target.new(self, val, key, caller[0])
         end
       end
     end
@@ -261,11 +235,19 @@ class Lax < Array
         node.class_eval(&b)
       end
     end
-  end
 
-  def initialize
-    ks = methods - self.class.superclass.instance_methods
-    ks.map {|k| send k}.each {|k| self << k}
+    def validate
+      hook = config.run
+      hook.start.call(as = map(&:asserts).flatten)
+      as.map do |assertion|
+        hook.before.call(assertion)
+        begin
+          assertion.validate
+        rescue => e
+          Assertion::Xptn.new(a, e)
+        end.tap {|v| hook.after.call(v)}
+      end.tap {|vs| hook.finish.call(vs)}
+    end
   end
 end
 
