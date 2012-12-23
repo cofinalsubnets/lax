@@ -19,10 +19,11 @@ describe Lax do
 
   describe '::assert' do
     specify { ->{ Lax.assert }.should raise_error ArgumentError }
-    subject { Lax.assert('hahalol') {}     }
+    subject { Lax.assert('hahawow') {}     }
     its(:superclass) { should be Lax       }
-    its(:docstring)  { should == 'hahalol' }
+    its(:doc)        { should == 'hahawow' }
     its(:new)        { should be_empty     }
+    specify { Lax.lings.should include subject }
   end
 end
 

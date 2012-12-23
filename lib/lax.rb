@@ -161,7 +161,7 @@ class Lax < Array
 
       # Returns a hook for generating terminal output from test cases.
       def summary
-        new {|cs| puts "Finished #{cs.size} tests with #{cs.reject(&:pass?).size} failures"}
+        new {|cs| puts "pass: #{cs.select(&:pass?).size}\nfail: #{cs.reject(&:pass?).size}"}
       end
 
       # Returns a hook for generating terminal output from test cases.
@@ -169,7 +169,7 @@ class Lax < Array
         new do |cs|
           puts
           cs.reject(&:pass?).each do |f|
-            puts "  in #{f.node.docstring or 'an undocumented node'} at #{f.src.split(/:in/).first}"
+            puts "  in #{f.node.doc or 'an undocumented node'} at #{f.src.split(/:in/).first}"
             puts "    an assertion on #{f.target} failed#{" to satisfy #{f.matcher}(#{f.args.join ', '})" if f.matcher}"
             Assertion::Xptn === f ?
               puts("    with an unhandled #{f.exception.class}: #{f.exception.message}"):
@@ -206,19 +206,19 @@ class Lax < Array
     }
   )
 
-  @hooks, @children, @targets = CONFIG.node, [], {}
+  @hooks, @lings, @targets = CONFIG.node, [], {}
 
-  def self.inherited(child)
-    @children << child
-    child.hooks    = @hooks.dup
-    child.children = []
-    child.targets  = {}
+  def self.inherited(ling)
+    @lings << ling
+    ling.hooks   = @hooks.dup
+    ling.lings   = []
+    ling.targets = {}
   end
 
   extend Enumerable
 
   class << self
-    attr_accessor :hooks, :children, :docstring, :targets
+    attr_accessor :hooks, :lings, :doc, :targets
 
     def config
       block_given? ? yield(CONFIG) : CONFIG
@@ -234,7 +234,15 @@ class Lax < Array
 
     def each(&b)
       yield self
-      children.each {|c| c.each(&b)}
+      lings.each {|c| c.each(&b)}
+    end
+
+    def before(&b)
+      hooks.before += b
+    end
+
+    def after(&b)
+      hooks.after += b
     end
 
     def let(h)
@@ -256,7 +264,7 @@ class Lax < Array
 
     def assert(doc=nil, &b)
       Class.new(self).tap do |node|
-        node.docstring = doc
+        node.doc = doc
         node.class_eval(&b)
       end
     end
