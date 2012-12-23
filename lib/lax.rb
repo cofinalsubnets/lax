@@ -130,7 +130,7 @@ class Lax < Array
 
   module Run
     def self.[](lax)
-      hook = lax.config.run.hooks
+      hook = lax.config.run
       hook.start[ as = lax.map(&:new).flatten ]
       as.map do |assertion|
         hook.before[ assertion ]
@@ -206,22 +206,18 @@ class Lax < Array
   CONFIG = Fixture::Hashable.new(
     task: { dir: :test, name: :lax },
     node: {
-      hooks: {
-        before: Hook.noop,
-        after:  Hook.noop
-      }
+      before: Hook.noop,
+      after:  Hook.noop
     },
     run: {
-      hooks: { 
-        start:  Hook.noop,
-        before: Hook.noop,
-        after:  Hook.noop,
-        finish: Hook.noop
-      }
+      start:  Hook.noop,
+      before: Hook.noop,
+      after:  Hook.noop,
+      finish: Hook.noop
     }
   )
 
-  @hooks    = CONFIG.node.hooks
+  @hooks    = CONFIG.node
   @children = []
 
   def self.inherited(child)

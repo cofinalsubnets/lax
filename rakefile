@@ -6,7 +6,7 @@ require 'pry'
 RSpec::Core::RakeTask.new 'spec'
 
 Lax.hook(:repl) {|c| c.pass? or binding.pry}
-#Lax.config.run.hooks.after += :repl
+#Lax.config.run.after += :repl
 
 task default: Lax::RakeTask.new
 
