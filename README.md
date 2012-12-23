@@ -24,7 +24,7 @@ how come lax is neat
 * Minimal legalese.
 * Easy-to-define custom matchers and hooks.
 * Built-in Rake task generator for quick setup.
-* Hackable with a tiny code footprint (< 300 SLOC).
+* Hackable with a tiny code footprint (< 250 SLOC).
 * Does not work by infecting the entire object system with its code - neighbourly!
 
 how to make it do it

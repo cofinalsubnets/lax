@@ -21,8 +21,8 @@ describe Lax::Hook do
     end
   end
 
-  describe '::_resolve' do
-    let(:resolve) { Lax::Hook.method :_resolve }
+  describe '#resolve' do
+    let(:resolve) { Lax::Hook.noop.method :resolve }
     context 'given a hook' do
       let(:hook) { Lax::Hook.new {:surprise!} }
       subject { resolve[hook] }
@@ -32,8 +32,9 @@ describe Lax::Hook do
     context 'given a symbol' do
       let(:a_hook) { :noop }
       let(:random_sym) { :asdfqwer }
-      specify { resolve[a_hook].call.should == nil }
-      specify { -> {resolve[random_sym]}.should raise_error NameError }
+      specify { resolve[a_hook].should be_an_instance_of Lax::Hook        }
+      specify { resolve[a_hook].call.should == nil                        }
+      specify { -> {resolve[random_sym]}.should raise_error NoMethodError }
     end
   end
 end

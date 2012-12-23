@@ -139,18 +139,6 @@ class Lax < Array
 
   class Hook < Proc
     class << self
-      def _resolve(hook)
-        if hook.is_a? Hook
-          hook
-        elsif hook.is_a? Proc
-          new &hook
-        elsif hook.is_a?(Symbol) and self.respond_to?(hook)
-          send hook
-        else
-          raise NameError, "Unable to resolve hook `#{hook}'"
-        end
-      end
-
       def noop
         new {|*a|}
       end
@@ -159,12 +147,10 @@ class Lax < Array
         new {|tc| print tc.pass? ? "\x1b[32m.\x1b[0m" : "\x1b[31mX\x1b[0m"}
       end
 
-      # Returns a hook for generating terminal output from test cases.
       def summary
         new {|cs| puts "pass: #{cs.select(&:pass?).size}\nfail: #{cs.reject(&:pass?).size}"}
       end
 
-      # Returns a hook for generating terminal output from test cases.
       def failures
         new do |cs|
           puts
@@ -184,11 +170,16 @@ class Lax < Array
     end
 
     def <<(hook)
-      Hook.new {|*a,&b| call(Hook._resolve(hook)[*a,&b])}
+      Hook.new {|*a,&b| call(resolve(hook)[*a,&b])}
     end
 
     def +(hook)
-      Hook.new {|*a,&b| call(*a,&b); Hook._resolve(hook)[*a,&b]}
+      Hook.new {|*a,&b| call(*a,&b);resolve(hook)[*a,&b]}
+    end
+
+    private
+    def resolve(hook)
+      Proc===hook ? hook : Hook.send(hook)
     end
   end
 
