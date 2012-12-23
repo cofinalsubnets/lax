@@ -1,4 +1,4 @@
-class Lax
+class Lax < Array
   VERSION = '0.2.2'
 
   class Assertion < Struct.new :target, :subject, :condition, :src, :matcher, :args, :node
@@ -13,8 +13,12 @@ class Lax
     def validate
       memoize(:validate) do
         node.hooks.before.call self
-        pass?
-        self.tap { node.hooks.after.call self }
+        begin
+          pass?
+          tap { node.hooks.after.call self }
+        rescue => e
+          Xptn.new(self, e)
+        end
       end
     end
 
@@ -65,12 +69,8 @@ class Lax
     def self.define_matcher(sym, &p)
       define_method(sym) do |*a,&b|
         p ? 
-          satisfies(sym) do |o|
-            p[*rslv(a),&b][o]
-          end :
-          satisfies(sym,*a) do |o|
-            o.__send__ sym,*rslv(a),&b
-          end
+          satisfies(sym) {|o| p[*rslv(a),&b][o] } :
+          satisfies(sym,*a) {|o| o.__send__ sym,*rslv(a),&b }
       end
     end
 
@@ -103,7 +103,8 @@ class Lax
 
     private
     def assert!(cond, matcher=nil, args=nil)
-      @node.asserts << ::Lax::Assertion.new(@name, @subj, cond, @src, matcher, args, @node)
+      name, subj, src = @name, @subj, @src
+      @node.hooks.init += ->(node){node.push ::Lax::Assertion.new(name, subj, cond, src, matcher, args, node.class)}
     end
 
     def rslv(vs)
@@ -140,6 +141,10 @@ class Lax
         end
       end
 
+      def prototype
+        new {|node| node.class.lings.each {|ling| node.push ling.new }}
+      end
+
       def define(sym, &p)
         define_singleton_method(sym) {new &p}
       end
@@ -163,7 +168,8 @@ class Lax
     task: { dir: :test, name: :lax },
     node: {
       before: Hook.noop,
-      after:  Hook.noop
+      after:  Hook.noop,
+      init:   Hook.prototype
     },
     run: {
       start:  Hook.noop,
@@ -173,19 +179,19 @@ class Lax
     }
   )
 
-  @hooks, @lings, @asserts = CONFIG.node, [], []
+  @hooks, @lings = CONFIG.node, []
 
   def self.inherited(ling)
     @lings << ling
-    ling.hooks   = @hooks.dup
-    ling.lings   = []
-    ling.asserts = []
+    ling.hooks      = @hooks.dup
+    ling.hooks.init = Hook.prototype
+    ling.lings      = []
   end
 
   extend Enumerable
 
   class << self
-    attr_accessor :hooks, :lings, :doc, :asserts
+    attr_accessor :hooks, :lings, :doc
 
     def config
       block_given? ? yield(CONFIG) : CONFIG
@@ -230,24 +236,23 @@ class Lax
     end
 
     def assert(doc=nil, &b)
-      Class.new(self).tap do |node|
-        node.doc = doc
-        node.class_eval(&b)
+      Class.new(self) do
+        self.doc = doc
+        class_eval(&b)
       end
     end
 
     def validate
-      hook = config.run
-      hook.start.call(as = map(&:asserts).flatten)
-      as.map do |assertion|
-        hook.before.call(assertion)
-        begin
-          assertion.validate
-        rescue => e
-          Assertion::Xptn.new(a, e)
-        end.tap {|v| hook.after.call(v)}
-      end.tap {|vs| hook.finish.call(vs)}
+      config.run.start.call(as = new.flatten)
+      as.map do |a|
+        config.run.before.call a
+        a.validate.tap {|a| config.run.after.call a}
+      end.tap {|as| config.run.finish.call as}
     end
+  end
+
+  def initialize
+    self.class.hooks.init.call self
   end
 end
 
