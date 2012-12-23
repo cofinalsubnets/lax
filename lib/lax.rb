@@ -96,7 +96,7 @@ class Lax < Array
     %w{odd? even? is_a? kind_of? include?}.each {|m| define_predicate m}
 
     def initialize(node, subj, name, src)
-      @node, @subj, @name, @src = node, subj, name, src 
+      @node, @subj, @init, @name, @src = node, subj, subj, name, src 
     end
 
     def satisfies(matcher=nil, *args, &cond)
@@ -104,7 +104,8 @@ class Lax < Array
     end
 
     def method_missing(sym, *args, &blk)
-      Target.new @node, ->{@subj.call.__send__(sym, *args, &blk)}, @name, @src
+      s, @subj = @subj, ->{s.call.__send__ sym, *args, &blk}
+      self
     end
 
     def __val__
@@ -113,7 +114,7 @@ class Lax < Array
 
     private
     def assert!(cond, matcher=nil, args=nil)
-      name, subj, src, node = @name, @subj, @src, @node
+      name, subj, src, node, @subj = @name, @subj, @src, @node, @init
       ord = @node.instance_methods.size.to_s
       @node.send(:include, ::Module.new do
         define_method(ord) do
@@ -217,19 +218,20 @@ class Lax < Array
     }
   )
 
-  @hooks    = CONFIG.node
-  @children = []
+  @hooks = CONFIG.node
+  @children, @targets = [], {}
 
   def self.inherited(child)
     @children << child
     child.hooks    = @hooks.dup
     child.children = []
+    child.targets  = {}
   end
 
   extend Enumerable
 
   class << self
-    attr_accessor :hooks, :children, :docstring
+    attr_accessor :hooks, :children, :docstring, :targets
 
     def config
       block_given? ? yield(CONFIG) : CONFIG
@@ -252,7 +254,7 @@ class Lax < Array
       h.each do |key, value|
         val = value.is_a?(Hook) ? value : ->{value}
         define_singleton_method(key) do
-          Target.new(self, val, key, caller[0])
+          @targets[key] ||= Target.new(self, val, key, caller[0])
         end
       end
     end
@@ -260,7 +262,6 @@ class Lax < Array
     def defer(&v)
       Hook.new(&v)
     end
-    alias _ defer
 
     def fix(hash)
       Fixture.new(hash)
@@ -272,6 +273,7 @@ class Lax < Array
         node.class_eval(&b)
       end
     end
+    alias _ assert
   end
 
   def initialize

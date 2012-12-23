@@ -2,7 +2,7 @@ Lax.assert do
   let number: 1,
       string: 'asdf',
       symbol: :a_sym,
-      regexp: _{/asd/}
+      regexp: defer{/asd/}
 
   assert do
     number == 1
