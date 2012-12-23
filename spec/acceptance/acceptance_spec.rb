@@ -4,17 +4,19 @@ describe Lax do
 
   context 'a simple case' do
     let :simple_case do
-      Lax.assert do
+      Lax.scope do
         let number: 19,
             string: 'asdf',
             symbol: :symbol
 
-        number.odd? == true
-        number == 19
-        string == 'asdf'
-        number == 20
-        string.upcase == 'ASDF'
-        symbol.to_s == 'symbol'
+        assert do
+          number.odd? == true
+          number == 19
+          string == 'asdf'
+          number == 20
+          string.upcase == 'ASDF'
+          symbol.to_s == 'symbol'
+        end
       end
     end
 
@@ -26,10 +28,10 @@ describe Lax do
 
   context 'compound targets' do
     let :comp do
-      Lax.assert do
+      Lax.scope do
         let number: 21
         let thirty: number + 9
-        thirty == 30
+        assert { thirty == 30 }
       end
     end
     subject { comp.new }

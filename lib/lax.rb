@@ -2,12 +2,26 @@ class Lax < Array
   VERSION = '0.2.2'
 
   class Assertion < Struct.new :target, :subject, :condition, :src, :chain, :matcher, :args, :node
+
+    module Show
+      def show_call_chain
+        [target, *chain.map {|c| call_to_s *c}, call_to_s(matcher, args, nil)].join ?.
+      end
+
+      private
+      def call_to_s(m,a,b)
+        "#{m}#{"(#{a.join ', '})" if a.any?}#{" {...}" if b}"
+      end
+    end
+
+    include Show
+
     def pass?
       memoize(:pass) { condition.call value }
     end
 
     def value
-      memoize(:value) { subject.call }
+      memoize(:value) { resolve_call_chain }
     end
 
     def validate
@@ -22,21 +36,19 @@ class Lax < Array
       end
     end
 
-    def call_chain
-      [target, *chain.map {|c| call_to_s *c}, call_to_s(matcher, args, nil)].join ?.
+    private
+    def resolve_call_chain
+      chain.reduce(subject.call) {|v,c| v.__send__ c[0],*c[1],&c[2]}
     end
 
-    private
     def memoize(key)
       (@memo||={}).has_key?(key) ? @memo[key] : @memo[key] = yield
     end
 
-    def call_to_s(m,a,b)
-      "#{m}#{"(#{a.join ', '})" if a.any?}#{" {...}" if b}"
-    end
 
     class Xptn < Struct.new :assertion, :exception
       attr_accessor :target, :src, :chain, :matcher, :args, :node
+      include Show
       def pass?; nil end
       def value; nil end
       def initialize(a, x)
@@ -98,9 +110,7 @@ class Lax < Array
     end
 
     def satisfies(matcher=:satisfies, *args, &cond)
-      @node.hooks.init += ->(n) {
-        n << ::Lax::Assertion.new(@name, call_chain, cond, @src, @chain, matcher, args, n.class)
-      }
+      @node << ::Lax::Assertion.new(@name, @subj, cond, @src, @chain, matcher, args, @node.class)
     end
 
     def method_missing(sym, *args, &blk)
@@ -109,27 +119,14 @@ class Lax < Array
     end
 
     def __val__
-      call_chain.call
+      @subj.call
     end
 
     private
-    def assert!(cond, matcher=nil, args=nil)
-      @node.hooks.init += ->(node){node.push self.to_assertion}
-    end
-
-    def call_chain
-      ->{ @chain.reduce(@subj.call) {|s,c| s.__send__ c[0], *c[1], &c[2]} }
-    end
-
     def rslv(vs)
       vs.map {|v| ::Lax::Target === v ? v.__val__ : v}
     end
-
-    def to_assertion
-    end
-
   end
-
 
   class Hook < Proc
     class << self
@@ -150,7 +147,7 @@ class Lax < Array
           puts
           cs.reject(&:pass?).each do |f|
             puts "  in #{f.node.doc or 'an undocumented node'} at #{f.src.split(/:in/).first}"
-            puts "    #{f.call_chain} #=> " <<
+            puts "    #{f.show_call_chain} #=> " <<
               (Assertion::Xptn === f ?  "unhandled #{f.exception.class}: #{f.exception.message}": "#{f.value}")
           end
         end
@@ -230,15 +227,14 @@ class Lax < Array
     end
 
     def after(&b)
-      hooks.after += b
+      hooks.after = Hook.new(&b) + hooks.after
     end
 
     def let(h)
       h.each do |key, value|
-        val = (Hook===value) ? value : (Target===value) ? defer{value.__val__} : ->{value}
-        define_singleton_method(key) do
-          Target.new(self, val, key, caller[0])
-        end
+        val = (Hook===value) ? value : (Target===value) ? defer{value.__val__} : defer{value}
+        define_singleton_method(key, val)
+        define_method(key, ->{Target.new(self, val, key, caller[0])})
       end
     end
 
@@ -250,11 +246,15 @@ class Lax < Array
       Fixture.new(hash)
     end
 
-    def assert(doc=nil, &b)
+    def scope(doc=nil, &b)
       Class.new(self) do
         self.doc = doc
         class_eval(&b)
       end
+    end
+
+    def assert(&b)
+      self.hooks.init += ->(n) {n.instance_eval &b}
     end
 
     def validate

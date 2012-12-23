@@ -1,62 +1,70 @@
-Lax.assert do
+Lax.scope do
   let number: 1,
       string: 'asdf',
       symbol: :a_sym,
       regexp: defer{/asd/}
 
-  assert do
-    number == 1
-    assert do
+  scope do
+    assert { number == 1 }
+    scope do
       let number: 2
-      number == 2
-
-      string.upcase.downcase == 'asdf'
-      string =~ regexp
+      assert do
+        number == 2
+        string.upcase.downcase == 'asdf'
+        string =~ regexp
+      end
     end
   end
 end
 
-Lax.assert do
+Lax.scope do
   let number: 1,
       string: 'Hi There',
       regexp: defer{ /the/ }
-  number + 1 == 2
-  string.downcase =~ regexp
+
   assert do
+    number + 1 == 2
+    string.downcase =~ regexp
+  end
+
+  scope do
     let number: 2
-    number - 1 == 1
+    assert { number - 1 == 1 }
   end
 end
 
-Lax.assert do
+Lax.scope do
   let number: 1,
       string: 'Hi There',
       regexp: defer{ /the/ } # lazy evaluation
 
-  number + 1 == 2
-  string.downcase =~ regexp
-
-#  before { puts "i am a callback" }
-#  after  { puts "and also" }
-
-  assert 'documented tests' do  # named assertion groups
-#    before { puts "callbacks are scoped like targets" }
-#    after  { puts "are stackable" }
-
-    let number: 2
-    number - 1 == 1
-    string.upcase == 'HI THERE' # string is in scope
-
-    let nothing: regexp.match('ffff') # compound targets are allowed
-    nothing == nil
+  assert do
+    number + 1 == 2
+    string.downcase =~ regexp
   end
 
+#  before { puts "i am a callback" }
+#  after  { puts "are stackable" }
 
-  let lax: self
-  lax.respond_to?(:bool) == false # bool is out of scope
+  scope 'documented tests' do  # named assertion groups
+#    before { puts "callbacks are scoped like targets" }
+#    after  { puts "and also" }
 
-  let open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
-  open_file.read.lines.map(&:strip).size == 4
+    let number: 2,
+        nothing: regexp.match('ffff')
 
+    assert do
+      number - 1 == 1
+      string.upcase == 'HI THERE' # string is in scope
+      nothing == nil
+    end
+  end
+
+  let lax: self,
+      open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+  assert do
+    lax.respond_to?(:bool) == false # bool is out of scope
+    open_file.read.lines.map(&:strip).size == 4
+  end
 end
 

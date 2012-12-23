@@ -2,29 +2,39 @@ lax
 ===
 Lax is an insouciant smidgen of a testing framework that tries hard to be an invisible wrapper around your ideas about how your code works.
 ```ruby
-Lax.assert do
+Lax.scope do
   let number: 1,
       string: 'Hi There',
       regexp: defer{ /the/ } # lazy evaluation
 
-  number + 1 == 2
-  string.downcase =~ regexp
-
-  assert 'documented tests' do  # named assertion groups
-    let number: 2
-    number - 1 == 1
-    string.upcase == 'HI THERE' # string is in scope
-
-    let nothing: regexp.match('ffff') # compound targets
-    nothing == nil
+  assert do
+    number + 1 == 2
+    string.downcase =~ regexp # each test passes or fails independently
   end
 
-  let lax: self
-  lax.respond_to?(:bool) == false # bool is out of scope
+  before { puts "i am a callback" }
+  after  { puts "are stackable" }
 
-  let open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
-  open_file.read.lines.map(&:strip).size == 4
+  scope 'documented tests' do  # named assertion groups
+    before { puts "callbacks are scoped like targets" }
+    after  { puts "and also" }
 
+    let number: 2,
+        nothing: regexp.match('ffff')
+
+    assert do
+      number - 1 == 1
+      string.upcase == 'HI THERE' # string is in scope
+      nothing == nil
+    end
+  end
+
+  let lax: self,
+      open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+  assert do
+    lax.respond_to?(:bool) == false # bool is out of scope
+    open_file.read.lines.map(&:strip).size == 4
+  end
 end
 
 Lax.go #=> green dots aww yeah
@@ -34,7 +44,7 @@ how come lax is neat
 * Minimal legalese.
 * Easy-to-define custom matchers and hooks.
 * Built-in Rake task generator for quick setup.
-* Hackable with a tiny code footprint (< 250 SLOC).
+* Small but strong! (< 250 SLOC)
 * Does not work by infecting the entire object system with its code - neighbourly!
 
 how to make it do it
