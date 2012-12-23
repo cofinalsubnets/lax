@@ -8,8 +8,7 @@ describe Lax do
       lax.let number: 1
       lax.number == 1
     end
-    subject { lax.instance_methods - Lax.instance_methods }
-    it { should have(1).thing }
+    specify { lax.new.should have(1).thing }
   end
 
   describe '#initialize' do

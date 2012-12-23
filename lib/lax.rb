@@ -1,7 +1,7 @@
 class Lax < Array
   VERSION = '0.2.2'
 
-  class Assertion < Struct.new :target, :subject, :condition, :src, :matcher, :args, :node
+  class Assertion < Struct.new :target, :subject, :condition, :src, :chain, :matcher, :args, :node
     def pass?
       memoize(:pass) { condition.call value }
     end
@@ -22,18 +22,26 @@ class Lax < Array
       end
     end
 
+    def call_chain
+      [target, *chain.map {|c| call_to_s *c}, call_to_s(matcher, args, nil)].join ?.
+    end
+
     private
     def memoize(key)
       (@memo||={}).has_key?(key) ? @memo[key] : @memo[key] = yield
     end
 
+    def call_to_s(m,a,b)
+      "#{m}#{"(#{a.join ', '})" if a.any?}#{" {...}" if b}"
+    end
+
     class Xptn < Struct.new :assertion, :exception
-      attr_accessor :target, :src, :matcher, :args, :node
+      attr_accessor :target, :src, :chain, :matcher, :args, :node
       def pass?; nil end
       def value; nil end
       def initialize(a, x)
         super
-        %w{target src matcher args node}.each {|m| send "#{m}=", a.send(m)}
+        %w{target src chain matcher args node}.each {|m| send "#{m}=", a.send(m)}
       end
     end
   end
@@ -86,29 +94,38 @@ class Lax < Array
     %w{odd? even? is_a? kind_of? include?}.each {|m| define_predicate m}
 
     def initialize(node, subj, name, src)
-      @node, @subj, @name, @src = node, subj, name, src 
+      @node, @subj, @name, @src, @chain = node, subj, name, src, []
     end
 
-    def satisfies(matcher=nil, *args, &cond)
-      assert!(cond, *[ matcher, args ])
+    def satisfies(matcher=:satisfies, *args, &cond)
+      @node.hooks.init += ->(n) {
+        n << ::Lax::Assertion.new(@name, call_chain, cond, @src, @chain, matcher, args, n.class)
+      }
     end
 
     def method_missing(sym, *args, &blk)
-      ::Lax::Target.new @node, ->{@subj.call.__send__ sym, *rslv(args), &blk}, @name, @src
+      @chain << [sym, rslv(args), blk]
+      self
     end
 
     def __val__
-      @subj.call
+      call_chain.call
     end
 
     private
     def assert!(cond, matcher=nil, args=nil)
-      name, subj, src = @name, @subj, @src
-      @node.hooks.init += ->(node){node.push ::Lax::Assertion.new(name, subj, cond, src, matcher, args, node.class)}
+      @node.hooks.init += ->(node){node.push self.to_assertion}
+    end
+
+    def call_chain
+      ->{ @chain.reduce(@subj.call) {|s,c| s.__send__ c[0], *c[1], &c[2]} }
     end
 
     def rslv(vs)
       vs.map {|v| ::Lax::Target === v ? v.__val__ : v}
+    end
+
+    def to_assertion
     end
 
   end
@@ -133,10 +150,8 @@ class Lax < Array
           puts
           cs.reject(&:pass?).each do |f|
             puts "  in #{f.node.doc or 'an undocumented node'} at #{f.src.split(/:in/).first}"
-            puts "    an assertion on #{f.target} failed#{" to satisfy #{f.matcher}(#{f.args.join ', '})" if f.matcher}"
-            Assertion::Xptn === f ?
-              puts("    with an unhandled #{f.exception.class}: #{f.exception.message}"):
-              puts("    with its return value: #{f.value}")
+            puts "    #{f.call_chain} #=> " <<
+              (Assertion::Xptn === f ?  "unhandled #{f.exception.class}: #{f.exception.message}": "#{f.value}")
           end
         end
       end
