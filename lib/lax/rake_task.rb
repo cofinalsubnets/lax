@@ -10,8 +10,8 @@ class Lax
           task(:load) { Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f} }
           task(:run) do
             Lax.config do |lax|
-              lax.run.after = Hook.output
-              lax.run.finish = Hook.failures + Hook.summary
+              lax.run.after  += Hook.output
+              lax.run.finish += Hook.failures + Hook.summary
             end
             Run[ Lax ]
           end

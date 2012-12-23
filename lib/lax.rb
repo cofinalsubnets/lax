@@ -239,7 +239,7 @@ class Lax < Array
 
     def let(h)
       h.each do |key, value|
-        val = value.is_a?(Hook) ? value : ->{value}
+        val = (Hook===value) ? value : (Target===value) ? defer{value.__val__} : ->{value}
         define_singleton_method(key) do
           @targets[key] ||= Target.new(self, val, key, caller[0])
         end
