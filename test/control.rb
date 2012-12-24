@@ -10,6 +10,7 @@ Lax.scope do
       let number: 2
       assert do
         number == 2
+        number.even
         string.upcase.downcase == 'asdf'
         string =~ regexp
       end
@@ -60,11 +61,13 @@ Lax.scope do
     end
   end
 
-  let lax: self,
-      open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
-  assert do
-    lax.respond_to?(:bool) == false # bool is out of scope
-    open_file.read.lines.map(&:strip).size == 4
+  scope do
+    let lax: self,
+        open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+    assert do
+      lax.respond_to?(:bool) == false # bool is out of scope
+      open_file.read.lines.map(&:strip).size == 4
+    end
   end
 end
 

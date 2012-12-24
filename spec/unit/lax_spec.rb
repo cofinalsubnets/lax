@@ -18,7 +18,6 @@ describe Lax do
 
   describe '::scope' do
     subject { Lax.scope('hahawow') {} }
-    specify { ->{Lax.scope}.should raise_error ArgumentError}
     specify { Lax.lings.should include subject }
     its(:superclass) { should == Lax  }
     its(:new) { should be_empty       }

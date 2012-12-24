@@ -1,18 +1,18 @@
 require 'rake'
 require 'lax'
+require 'lax/output'
 class Lax
   module RakeTask
     class << self
       include Rake::DSL
       def new(opts = {})
-        o = Lax.config.task.merge opts
+        o = {dir: :test, name: :lax}.merge(opts)
         namespace o[:name] do
           task(:load) { Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f} }
           task(:run) do
-            Lax.config do |lax|
-              lax.run.after  += Hook.output
-              lax.run.finish += Hook.failures + Hook.summary
-            end
+            Lax.after &DOTS
+            Lax.finish &SUMMARY
+            Lax.finish &FAILURES
             Lax.validate
           end
         end
