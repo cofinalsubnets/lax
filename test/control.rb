@@ -72,3 +72,13 @@ Lax.scope do
   end
 end
 
+Lax.scope do
+  let lax: Lax
+  assert do
+    lax.scope do
+      let altitude: 10_000
+      assert { altitude > 1000 }
+    end.new.size == 1
+  end
+end
+

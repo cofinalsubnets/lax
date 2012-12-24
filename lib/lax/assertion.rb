@@ -21,7 +21,7 @@ class Lax
     end
 
     def show
-      [target, *call_chain.map {|c| call_to_s *c}, call_to_s(matcher, args, nil)].join ?.
+      [target, *call_chain.map {|c| call_to_s *c}, call_to_s(matcher, args, nil)]*?.
     end
 
     private

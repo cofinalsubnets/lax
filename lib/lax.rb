@@ -1,7 +1,6 @@
 require 'lax/version'
 class Lax < Array
   autoload :Assertion, 'lax/assertion'
-  autoload :Fixture,   'lax/fixture'
   autoload :Target,    'lax/target'
 
   @lings = []
@@ -100,6 +99,12 @@ class Lax < Array
 
   def after(*a);  end
   def before(*a); end
+
   class Defer < Proc; end
+  module Fixture
+    def self.new(hash)
+      Struct.new(*hash.keys).send(:include, self).new *hash.values
+    end
+  end
 end
 
