@@ -52,7 +52,8 @@ Lax.scope do
 #    after  { puts "and also" }
 
     let number: 2,
-        nothing: regexp.match('ffff')
+        nothing: regexp.match('ffff'),
+        bool:    true
 
     assert do
       number - 1 == 1

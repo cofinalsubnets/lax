@@ -3,13 +3,13 @@ lax
 Lax is an insouciant smidgen of a testing framework that tries hard to be an invisible wrapper around your ideas about how your code works.
 ```ruby
 Lax.scope do
-  let number: 1,
+  let number: 1,             # let defines assertion targets
       string: 'Hi There',
-      regexp: defer{ /the/ } # lazy evaluation
+      regexp: defer{ /the/ } # for lazy evaluation
 
   assert do
     number + 1 == 2
-    string.downcase =~ regexp # each test passes or fails independently
+    string.downcase =~ regexp
   end
 
   before { puts "i am a callback" }
@@ -19,8 +19,9 @@ Lax.scope do
     before { puts "callbacks are scoped like targets" }
     after  { puts "and also" }
 
-    let number: 2,
-        nothing: regexp.match('ffff')
+    let number:  2,
+        nothing: regexp.match('ffff') # compound target
+        bool:    true
 
     assert do
       number - 1 == 1
@@ -29,15 +30,17 @@ Lax.scope do
     end
   end
 
-  let lax: self,
-      open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
-  assert do
-    lax.respond_to?(:bool) == false # bool is out of scope
-    open_file.read.lines.map(&:strip).size == 4
+  scope do
+    let lax: self,
+        open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+    assert do
+      lax.respond_to?(:bool) == false # bool is out of scope
+      open_file.read.lines.map(&:strip).size == 4
+    end
   end
 end
 
-Lax.go #=> green dots aww yeah
+Lax.validate #=> green dots aww yeah
 ```
 how come lax is neat
 --------------------

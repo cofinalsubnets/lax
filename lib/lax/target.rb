@@ -22,6 +22,7 @@ class Lax
     end
 
     def satisfies(matcher=:satisfies, *args, &cond)
+      @node.before
       @node << ::Lax::Assertion.new(@name, @subj, cond, @src, @chain, matcher, rslv(args), @node.class.doc)
     end
 

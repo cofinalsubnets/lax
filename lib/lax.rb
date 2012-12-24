@@ -49,8 +49,8 @@ class Lax < Array
     end
 
     def validate
-      _start(ls = map(&:new))
-      _finish ls.flat_map(&:validate)
+      _start(ls = flat_map(&:new))
+      _finish ls
     end
 
     def _start(*a);  end
@@ -58,49 +58,44 @@ class Lax < Array
 
     def before(&bef)
       before = instance_method(:before)
-      define_method(:before) do |a|
-        before.bind(self).call a
-        instance_exec(a, &bef)
+      define_method(:before) do |*a|
+        before.bind(self).call *a
+        instance_exec(*a, &bef)
       end
     end
 
     def after(&aft)
       after = instance_method(:after)
-      define_method(:after) do |a|
-        instance_exec(a, &aft)
-        after.bind(self).call a
+      define_method(:after) do |*a|
+        instance_exec(*a, &aft)
+        after.bind(self).call *a
       end
     end
 
     def start(&strt)
       start = method(:_start).unbind
-      define_singleton_method(:_start) do |a|
-        start.bind(self).call a
-        class_exec(a, &strt)
+      define_singleton_method(:_start) do |*a|
+        start.bind(self).call *a
+        class_exec(*a, &strt)
       end
     end
 
     def finish(&fin)
       finish = method(:_finish).unbind
-      define_singleton_method(:_finish) do |a|
-        class_exec(a, &fin)
-        finish.bind(self).call a
+      define_singleton_method(:_finish) do |*a|
+        class_exec(*a, &fin)
+        finish.bind(self).call *a
       end
     end
-
   end
 
   def initialize
     begin
-      before
       (p=self.class.prototype) and p.call(self)
+      each {|a| a.validate.tap {|v| after v}}
     rescue => e
       push Assertion::Exception::Toplevel.new(self.class.doc, e)
     end
-  end
-
-  def validate
-    map(&:validate).each {|a| after a}
   end
 
   def after(*a);  end
