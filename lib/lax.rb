@@ -82,17 +82,21 @@ class Lax < Array
     end
 
     def that(*as)
-      concat as.map {|a| Assertion.new !!a, self.class.src, self.class.doc}
+      concat as.map {|a| assert a}
     end
 
     def satisfies
-      push yield pop
+      push assert yield pop
+    end
+
+    def assert(v,x=nil)
+      Assertion.new !!v, self.class.src, self.class.doc, x
     end
 
     def initialize
       before
     rescue => e
-      push Assertion.new(false, self.class.src, self.class.doc, e)
+      push assert(false, e)
     ensure
       after self
     end
