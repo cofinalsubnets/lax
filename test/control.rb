@@ -2,17 +2,17 @@ Lax.scope do
   let number: 1,
       string: 'asdf',
       symbol: :a_sym,
-      regexp: defer{/asd/}
+      regexp: lazy{/asd/}
 
   scope do
-    assert { number == 1 }
+    assert { that number == 1 }
     scope do
       let number: 2
       assert do
-        number == 2
-        number.even
-        string.upcase.downcase == 'asdf'
-        string =~ regexp
+        that number == 2,
+             number.even?,
+             string.upcase.downcase == 'asdf',
+             string =~ regexp
       end
     end
   end
@@ -21,53 +21,38 @@ end
 Lax.scope do
   let number: 1,
       string: 'Hi There',
-      regexp: defer{ /the/ }
+      regexp: lazy{ /the/ } # lazy evaluation
+
+  string {upcase == 'HI THERE'}
 
   assert do
-    number + 1 == 2
-    string.downcase =~ regexp
+    that number + 1 == 2,
+      string.downcase =~ regexp
   end
 
-  scope do
-    let number: 2
-    assert { number - 1 == 1 }
-  end
-end
-
-Lax.scope do
-  let number: 1,
-      string: 'Hi There',
-      regexp: defer{ /the/ } # lazy evaluation
-
-  assert do
-    number + 1 == 2
-    string.downcase =~ regexp
-  end
-
-#  before { puts "i am a callback" }
+#  before { puts "i will be run once for each assert block in my scope" }
 #  after  { puts "are stackable" }
 
-  scope 'documented tests' do  # named assertion groups
-#    before { puts "callbacks are scoped like targets" }
-#    after  { puts "and also" }
-
+  scope do
     let number: 2,
         nothing: regexp.match('ffff'),
         bool:    true
+    before { @qqq=9}
 
-    assert do
-      number - 1 == 1
-      string.upcase == 'HI THERE' # string is in scope
-      nothing == nil
-    end
+    assert 'documented tests' do
+      that number + @qqq == 11,
+        number - 1 == 1,
+        string.upcase == 'HI THERE', # string is in scope
+        nothing == nil
+   end
   end
 
   scope do
     let lax: self,
         open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
-    assert do
-      lax.respond_to?(:bool) == false # bool is out of scope
-      open_file.read.lines.map(&:strip).size == 4
+   assert do
+     that lax.respond_to?(:bool) == false # bool is out of scope
+     that open_file.read.lines.map(&:strip).size == 4
     end
   end
 end
@@ -75,10 +60,11 @@ end
 Lax.scope do
   let lax: Lax
   assert do
-    lax.scope do
-      let altitude: 10_000
-      assert { altitude > 1000 }
-    end.new.size == 1
+    group = lax.scope do
+      let altitude: 10000
+      assert { that altitude > 1000 }
+    end.lings.first.new
+    that group.size==1
   end
 end
 

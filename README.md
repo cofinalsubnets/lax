@@ -3,20 +3,25 @@ lax
 Lax is an insouciant smidgen of a testing framework that tries hard to be an invisible wrapper around your ideas about how your code works.
 ```ruby
 Lax.scope do
-  let number: 1,             # let defines assertion targets
-      string: 'Hi There',
-      regexp: defer{ /the/ } # for lazy evaluation
+  let number: 1,             # let defines targets that are appropriately scoped and
+      string: 'Hi There',    # re-instantiated for each assertion block.
+      regexp: lazy{ /the/ }  # <- lazy evaluation
 
   assert do
-    number + 1 == 2
-    string.downcase =~ regexp
+    that number + 1 == 2,          # these assertions can pass or fail independently
+         string.downcase =~ regexp
+
+    that(regexp.hash).satisfies {|obj| obj.is_a? Fixnum} # you can also easily define your own conditions
   end
 
-  before { puts "i am a callback" }
-  after  { puts "are stackable" }
+  string { upcase.strip == 'HI THERE' } # you can also make assertions like this - the block is eval'd in the context of the value defined by let
+
+  before { puts "i am a callback. hiii" }
+  before { puts "i will be run once for each assert block in my scope" }
 
   scope 'documented tests' do  # named assertion groups
-    before { puts "callbacks are scoped like targets" }
+    before { puts "callbacks are scoped in the same way targets" }
+    before { @this_ivar = 'is visible in assertion blocks' }
     after  { puts "and also" }
 
     let number:  2,
@@ -24,30 +29,30 @@ Lax.scope do
         bool:    true
 
     assert do
-      number - 1 == 1
-      string.upcase == 'HI THERE' # string is in scope
-      nothing == nil
+      that number - 1 == 1,
+           string.upcase == 'HI THERE', # string is still in scope
+           nothing == nil
     end
   end
 
   scope do
     let lax: self,
-        open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+        open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures are also a thing
     assert do
-      lax.respond_to?(:bool) == false # bool is out of scope
-      open_file.read.lines.map(&:strip).size == 4
+      that lax.respond_to?(:bool) == false, # bool is out of scope
+           open_file.read.lines.map(&:strip).size == 4
     end
   end
 end
 
-Lax.validate #=> green dots aww yeah
+Lax::Run[ Lax ] #=> green dots aww yeah
 ```
 how come lax is neat
 --------------------
 * Minimal legalese.
-* Easy-to-define custom matchers and hooks.
+* Easy-to-define custom matchers.
 * Built-in Rake task generator for quick setup.
-* Small but strong! (< 250 SLOC)
+* Small & hackable is a design goal (< 150 SLOC with plenty of hooks for your code)
 * Does not work by infecting the entire object system with its code - neighbourly!
 
 how to make it do it

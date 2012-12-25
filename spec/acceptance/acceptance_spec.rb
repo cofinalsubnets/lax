@@ -10,20 +10,20 @@ describe Lax do
             symbol: :symbol
 
         assert do
-          number.odd? == true
-          number == 19
-          string == 'asdf'
-          number == 20
-          string.upcase == 'ASDF'
-          symbol.to_s == 'symbol'
+          that number.odd? == true,
+            number == 19,
+            string == 'asdf',
+            number == 20,
+            string.upcase == 'ASDF',
+            symbol.to_s == 'symbol'
         end
       end
     end
 
-    subject { simple_case.new }
+    subject { simple_case.lings.last.new }
     it      { should have(6).things }
-    specify { subject.select(&:pass?).should have(5).things }
-    specify { subject.reject(&:pass?).should have(1).things }
+    specify { subject.select(&:pass).should have(5).things }
+    specify { subject.reject(&:pass).should have(1).things }
   end
 
   context 'compound targets' do
@@ -31,12 +31,12 @@ describe Lax do
       Lax.scope do
         let number: 21
         let thirty: number + 9
-        assert { thirty == 30 }
+        assert { that thirty == 30 }
       end
     end
-    subject { comp.new }
+    subject { comp.lings.last.new }
     it { should have(1).thing }
-    specify { subject.first.pass?.should == true }
+    specify { subject.first.pass.should == true }
   end
 
 end
