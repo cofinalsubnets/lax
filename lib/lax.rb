@@ -120,16 +120,16 @@ class Lax < Array
 
   module Output
     DOTS = ->(tc) {
-      tc.each {|c| print (c&&!c.is_a?(Exception)) ? "\x1b[32m.\x1b[0m" : "\x1b[31mX\x1b[0m"}
+      tc.each {|c| print c.pass ? "\x1b[32m.\x1b[0m" : "\x1b[31mX\x1b[0m"}
     }
 
     SUMMARY = ->(cs) {
-      puts "pass: #{ps=cs.select(&:pass).size}\nfail: #{cs.size-ps}"
+      puts "pass: #{cs.select(&:pass).size}\nfail: #{cs.reject(&:pass).size}"
     }
     FAILURES = ->(cs) {
       puts
       cs.reject(&:pass).each do |f|
-        puts "  failure in #{g.doc || 'an undocumended node'} at #{g.src*?:}"
+        puts "  failure in #{f.doc || 'an undocumended node'} at #{f.source*?:}"
         puts "    raised #{f.exception.class} : #{f.exception.message}" if f.exception
       end
     }
