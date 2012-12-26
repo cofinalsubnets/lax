@@ -64,14 +64,3 @@ Lax.scope do
   end
 end
 
-Lax.scope do
-  let lax: Lax
-  assert do
-    group = lax.scope do
-      let altitude: 10000
-      assert { that altitude > 1000 }
-    end.lings.first.new
-    that group.size==1
-  end
-end
-

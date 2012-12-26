@@ -3,7 +3,7 @@ class Lax < Array
 
   Lazy = Class.new Proc
   Run  = ->(lax=Lax, fin=->(n){n}) do
-    fin.call lax.select {|l| l.included_modules.include? AssertionGroup}.map(&:new).flatten
+    fin.call lax.map(&:new).flatten
   end
   Assertion = Struct.new(:pass, :source, :doc, :exception)
 
