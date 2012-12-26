@@ -2,9 +2,6 @@ class Lax < Array
   VERSION = '0.2.3'
 
   Lazy = Class.new Proc
-  Run  = ->(lax=Lax, fin=->(n){n}) do
-    fin.call lax.map(&:new).flatten
-  end
   Assertion = Struct.new(:pass, :source, :doc, :exception)
 
   @lings = []
@@ -61,6 +58,10 @@ class Lax < Array
       Class.new(self, &b)
     end
 
+    def run(hook=->(n){n})
+      hook.call map(&:new).flatten
+    end
+
     def after(&aft)
       ->(m) { define_method(:after) do |*a|
         instance_exec(*a, &aft)
@@ -111,7 +112,7 @@ class Lax < Array
         task(:load) { Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f} }
         task(:run) do
           Lax.after &Output::DOTS
-          Run[ Lax, ->(n){Output::FAILURES[n]; Output::SUMMARY[n]} ]
+          Lax.run ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}
         end
       end
       task o[:name] => ["#{o[:name]}:load", "#{o[:name]}:run"]
