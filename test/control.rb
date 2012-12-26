@@ -34,10 +34,17 @@ Lax.scope do
 #  after  { puts "are stackable" }
 
   scope do
+
+    def self.number_is_even
+      number { even? }
+    end
+
     let number: 2,
         nothing: regexp.match('ffff'),
         bool:    true
     before { @qqq=9}
+
+    number_is_even
 
     assert 'documented tests' do
       that number + @qqq == 11,

@@ -14,21 +14,27 @@ Lax.scope do
     that(regexp.hash).satisfies {|obj| obj.is_a? Fixnum} # you can also easily define your own conditions
   end
 
-  string { upcase.strip == 'HI THERE' } # you can also make assertions like this - the block is eval'd in the context of the value defined by let
+  string { upcase.strip == 'HI THERE' } # you can also make assertions like this
 
-  before { puts "i am a callback. hiii" }
-  before { puts "i will be run once for each assert block in my scope" }
+  before { puts "hiii. i am a callback. i will be run once for each assertion block in my scope." }
 
-  scope 'documented tests' do  # named assertion groups
-    before { puts "callbacks are scoped in the same way targets" }
+  scope do
+    before { puts "i will be run after the before callback in my enclosing scope." }
     before { @this_ivar = 'is visible in assertion blocks' }
-    after  { puts "and also" }
+    after  { puts 'after callbacks also are a thing' }
+
+
+    def self.number_is_even # rspec-like 'shared examples' can be defined like this.
+      number { even? }
+    end
 
     let number:  2,
         nothing: regexp.match('ffff') # compound target
         bool:    true
 
-    assert do
+    number_is_even
+
+    assert 'documented tests' do        # docstrings can optionally be attached to assertion groups.
       that number - 1 == 1,
            string.upcase == 'HI THERE', # string is still in scope
            nothing == nil
