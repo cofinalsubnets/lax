@@ -51,7 +51,7 @@ Lax.scope do
         number - 1 == 1,
         string.upcase == 'HI THERE', # string is in scope
         nothing == nil
-   end
+    end
   end
 
   scope do

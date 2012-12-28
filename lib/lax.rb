@@ -58,8 +58,8 @@ class Lax < Array
       Class.new(self, &b)
     end
 
-    def run(hook=->(n){n})
-      hook.call map(&:new).flatten
+    def run
+      map(&:new).flatten
     end
 
     def after(&aft)
@@ -70,7 +70,7 @@ class Lax < Array
     end
 
     def matcher(sym,&p)
-      define_method(sym) { satisfies &p}
+      define_method(sym) { satisfies &p }
     end
   end
 
@@ -112,7 +112,7 @@ class Lax < Array
         task(:load) { Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f} }
         task(:run) do
           Lax.after &Output::DOTS
-          Lax.run ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}
+          ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}.call Lax.run
         end
       end
       task o[:name] => ["#{o[:name]}:load", "#{o[:name]}:run"]
