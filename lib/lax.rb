@@ -87,11 +87,11 @@ class Lax < Array
     end
 
     def satisfies
-      push assert yield pop
+      push assert yield pop.pass
     end
 
     def assert(v,x=nil)
-      Assertion.new !!v, self.class.src, self.class.doc, x
+      Assertion.new v, self.class.src, self.class.doc, x
     end
 
     def initialize
