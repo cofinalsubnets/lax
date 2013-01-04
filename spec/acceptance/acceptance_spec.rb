@@ -4,40 +4,36 @@ describe Lax do
 
   context 'a simple case' do
     let :simple_case do
-      Lax.scope do
+      Lax.assert do
         let number: 19,
             string: 'asdf',
             symbol: :symbol
 
-        assert do
-          that number.odd? == true,
-            number == 19,
-            string == 'asdf',
-            number == 20,
-            string.upcase == 'ASDF',
-            symbol.to_s == 'symbol'
-        end
-      end
+        that { number.odd? == true     }
+        that { number == 19            }
+        that { string == 'asdf'        }
+        that { number == 20            }
+        that { string.upcase == 'ASDF' }
+        that { symbol.to_s == 'symbol' }
+      end.lings.map &:new
     end
 
-    subject { simple_case.lings.last.new }
-    it      { should have(6).things }
-    specify { subject.select(&:pass).should have(5).things }
-    specify { subject.reject(&:pass).should have(1).things }
+    specify { simple_case.should have(6).things }
+    specify { simple_case.select(&:pass).should have(5).things }
+    specify { simple_case.reject(&:pass).should have(1).things }
   end
 
   context 'compound targets' do
     let :comp do
-      Lax.scope do
+      Lax.assert do
         let number: 21
         let thirty: number + 9
-        assert { that thirty == 30 }
+        that { thirty == 30 }
       end
     end
-    subject { comp.lings.last.new }
+    subject { comp.lings.map &:new }
     it { should have(1).thing }
     specify { subject.first.pass.should == true }
   end
-
 end
 

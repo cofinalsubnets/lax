@@ -13,26 +13,26 @@ describe Lax do
 
   describe '#initialize' do
     subject { lax.new }
-    it { should be_empty }
-  end
-
-  describe '::scope' do
-    subject { Lax.scope }
-    specify { Lax.lings.should include subject }
-    its(:superclass) { should == Lax  }
-    its(:new) { should be_empty       }
+    its(:pass) { should be_nil }
+    its(:exception) { should be_nil }
   end
 
   describe '::assert' do
-    subject do
-      Lax.scope do
+    subject { Lax.assert }
+    specify { Lax.lings.should include subject }
+  end
+
+  describe '::assert' do
+    let :assertion do
+      Lax.assert do
         let number: 22
-        assert('hahawow') { that number == 22 }
-      end.lings.last
+        that { number == 22 }
+      end.lings.last.new
     end
-    specify   { subject.superclass.superclass.should be Lax }
-    its(:doc) { should == 'hahawow'  }
-    its(:new) { should have(1).thing }
+    subject { assertion }
+    specify { assertion.class.superclass.superclass.should be Lax }
+    its(:pass) { should be_true }
+    its(:exception) { should be_nil }
   end
 end
 

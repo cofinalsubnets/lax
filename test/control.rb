@@ -1,66 +1,59 @@
-Lax.scope do
+Lax.assert do
   let number: 1,
       string: 'asdf',
       symbol: :a_sym,
       regexp: lazy{/asd/}
 
-  scope do
-    assert { that number == 1 }
-    scope do
+  assert do
+    that { number == 1 }
+    assert do
       let number: 2
-      assert do
-        that number == 2,
-             number.even?,
-             string.upcase.downcase == 'asdf',
-             string =~ regexp
-      end
+      that { number == 2 }
+      that { number.even? }
+      that { string.upcase.downcase == 'asdf' }
+      that { string =~ regexp }
     end
   end
 end
 
-Lax.scope do
+Lax.assert do
   let number: 1,
       string: 'Hi There',
       regexp: lazy{ /the/ } # lazy evaluation
 
-  string {upcase == 'HI THERE'}
+  that { string.upcase == 'HI THERE' }
 
-  assert do
-    that number + 1 == 2,
-      string.downcase =~ regexp
-  end
+  that { number + 1 == 2 }
+  that { string.downcase =~ regexp }
 
 #  before { puts "i will be run once for each assert block in my scope" }
-#  after  { puts "are stackable" }
+#  after  { puts "stackable" }
 
-  scope do
+  assert do
+#    before { puts "i am a callback" }
+#    after  { puts "callbacks are also" }
+    before { @qqq=9 }
 
-    def self.number_is_even
-      number { even? }
+    def number_is_even
+      number.even?
     end
 
     let number: 2,
         nothing: regexp.match('ffff'),
         bool:    true
-    before { @qqq=9}
 
-    number_is_even
-
-    assert 'documented tests' do
-      that number + @qqq == 11,
-        number - 1 == 1,
-        string.upcase == 'HI THERE', # string is in scope
-        nothing == nil
-    end
+    that { number_is_even }
+    that { number + @qqq == 11}
+    that { number - 1 == 1 }
+    that { string.upcase == 'HI THERE' } # string is in scope
+    that { nothing == nil }
   end
 
-  scope do
+  assert do
     let lax: self,
         open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
-   assert do
-     that lax.respond_to?(:bool) == false # bool is out of scope
-     that open_file.read.lines.map(&:strip).size == 4
-    end
+    that { lax.respond_to?(:bool) == false }# bool is out of scope
+    that { open_file.read.lines.map(&:strip).size == 4 }
   end
 end
 

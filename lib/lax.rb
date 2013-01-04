@@ -1,105 +1,63 @@
-class Lax < Array
-  VERSION = '0.2.3'
+class Lax < Struct.new(:pass, :exception)
+  VERSION = '0.2.4'
+  Lazy    = Class.new Proc
 
-  Lazy = Class.new Proc
-  Assertion = Struct.new(:pass, :source, :doc, :exception)
-
-  @lings = []
   extend Enumerable
+  @lings = []
   def self.inherited(ling)
     @lings << ling
     ling.lings = []
   end
 
   class << self
-    attr_accessor :lings, :src, :doc
-
-    def each(&b)
-      yield self
-      lings.each {|c| c.each(&b)}
-    end
+    attr_accessor :lings, :assertion
+    def lazy;         Lazy.new                               end
+    def assert(&b);   Class.new(self, &b)                    end
+    def before(&bef); mcompose instance_method(:before), bef end
+    def after(&aft);  mcompose instance_method(:after),  aft end
+    def fix(hash); Struct.new(*hash.keys).new *hash.values   end
 
     def let(h)
       h.each do |key, value|
         val = (Lazy===value) ? value : lazy{value}
-        define_singleton_method(key) do |&b|
-          b ? assert { that val.call.instance_exec(&b) } : val.call
-        end
+        define_singleton_method(key, val)
         define_method(key) do
           (@_memo||={}).has_key?(key)? @_memo[key] : @_memo[key] = val.call
         end
       end
     end
 
-    def lazy
-      Lazy.new
+    def that(&spec)
+      assert { include @assertion = Assertion.new(spec) }
     end
 
-    def fix(hash)
-      Struct.new(*hash.keys).new *hash.values
+    def each(&b)
+      yield self
+      lings.each {|ling| ling.each(&b)}
     end
 
-    def before(&bef)
-      ->(m) { define_method(:before) do |*a|
-        m.bind(self).call *a
-        instance_exec(*a, &bef)
-      end }.call instance_method :before
-    end
-
-    def assert(doc=nil,&spec)
-      scope do
-        @doc, @src = doc, spec.source_location
-        include AssertionGroup
-        before(&spec)
-      end
-    end
-
-    def scope(&b)
-      Class.new(self, &b)
-    end
-
-    def run
-      map(&:new).flatten
-    end
-
-    def after(&aft)
-      ->(m) { define_method(:after) do |*a|
-        instance_exec(*a, &aft)
-        m.bind(self).call *a
-      end }.call instance_method :after
-    end
-
-    def matcher(sym,&p)
-      define_method(sym) { satisfies &p }
+    private
+    def mcompose(mtd, prc)
+      define_method(mtd.name) {instance_exec(&prc); mtd.bind(self).call}
     end
   end
 
   def before(*a); end
   def after(*a);  end
 
-  module AssertionGroup
-    def fix(hash)
-      self.class.fix hash
-    end
-
-    def that(*as)
-      concat as.map {|a| assert a}
-    end
-
-    def satisfies
-      push assert yield pop.pass
-    end
-
-    def assert(v,x=nil)
-      Assertion.new v, self.class.src, self.class.doc, x
-    end
-
-    def initialize
-      before
-    rescue => e
-      push assert(false, e)
-    ensure
-      after self
+  class Assertion < Module
+    def initialize(spec)
+      define_method(:source) { spec.source_location }
+      define_method :initialize do
+        before
+        begin
+          self.pass = instance_eval(&spec)
+        rescue => e
+          self.exception = e
+        ensure
+          after
+        end
+      end
     end
   end
 
@@ -112,7 +70,7 @@ class Lax < Array
         task(:load) { Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f} }
         task(:run) do
           Lax.after &Output::DOTS
-          ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}.call Lax.run
+          ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}.call Lax.select(&:assertion).map &:new
         end
       end
       task o[:name] => ["#{o[:name]}:load", "#{o[:name]}:run"]
@@ -120,20 +78,15 @@ class Lax < Array
   end
 
   module Output
-    DOTS = ->(tc) {
-      tc.each {|c| print c.pass ? "\x1b[32m.\x1b[0m" : "\x1b[31mX\x1b[0m"}
-    }
-
-    SUMMARY = ->(cs) {
-      puts "pass: #{cs.select(&:pass).size}\nfail: #{cs.reject(&:pass).size}"
-    }
-    FAILURES = ->(cs) {
+    DOTS     = ->{print pass ? "\x1b[32m.\x1b[0m" : "\x1b[31mX\x1b[0m"}
+    SUMMARY  = ->(cs) {puts "pass: #{cs.select(&:pass).size}\nfail: #{cs.reject(&:pass).size}"}
+    FAILURES = ->(cs) do
       puts
       cs.reject(&:pass).each do |f|
-        puts "  failure in #{f.doc || 'an undocumended node'} at #{f.source*?:}"
+        puts "  failure at #{f.source*?:}"
         puts "    raised #{f.exception.class} : #{f.exception.message}" if f.exception
       end
-    }
+    end
   end
 end
 
