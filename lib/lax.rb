@@ -1,9 +1,9 @@
 class Lax < Struct.new(:pass, :exception)
   VERSION = '0.2.4'
   Lazy    = Class.new Proc
+  @lings  = []
 
   extend Enumerable
-  @lings = []
   def self.inherited(ling)
     @lings << ling
     ling.lings = []
@@ -11,11 +11,17 @@ class Lax < Struct.new(:pass, :exception)
 
   class << self
     attr_accessor :lings, :assertion
-    def lazy;         Lazy.new                               end
-    def assert(&b);   Class.new(self, &b)                    end
-    def before(&bef); mcompose instance_method(:before), bef end
-    def after(&aft);  mcompose instance_method(:after),  aft end
-    def fix(hash); Struct.new(*hash.keys).new *hash.values   end
+    def lazy
+      Lazy.new   
+    end
+
+    def assert(&b)
+      Class.new(self, &b)    
+    end
+
+    def fix(hash)
+      Struct.new(*hash.keys).new *hash.values 
+    end
 
     def let(h)
       h.each do |key, value|
@@ -27,6 +33,20 @@ class Lax < Struct.new(:pass, :exception)
       end
     end
 
+    def before(&bef)
+      ->(m) { define_method :before do
+        m.bind(self).call
+        instance_exec &bef
+      end }.call instance_method :before
+    end
+
+    def after(&aft)
+      ->(m) { define_method :after do
+        instance_exec &aft
+        m.bind(self).call
+      end }.call instance_method :after
+    end
+
     def that(&spec)
       assert { include @assertion = Assertion.new(spec) }
     end
@@ -35,15 +55,10 @@ class Lax < Struct.new(:pass, :exception)
       yield self
       lings.each {|ling| ling.each(&b)}
     end
-
-    private
-    def mcompose(mtd, prc)
-      define_method(mtd.name) {instance_exec(&prc); mtd.bind(self).call}
-    end
   end
 
-  def before(*a); end
-  def after(*a);  end
+  def before; end
+  def after;  end
 
   class Assertion < Module
     def initialize(spec)
@@ -54,9 +69,8 @@ class Lax < Struct.new(:pass, :exception)
           self.pass = instance_eval(&spec)
         rescue => e
           self.exception = e
-        ensure
-          after
         end
+        after
       end
     end
   end
@@ -66,14 +80,11 @@ class Lax < Struct.new(:pass, :exception)
       require 'rake'
       extend Rake::DSL
       o = {dir: :test, name: :lax}.merge(opts)
-      namespace o[:name] do
-        task(:load) { Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f} }
-        task(:run) do
-          Lax.after &Output::DOTS
-          ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}.call Lax.select(&:assertion).map &:new
-        end
+      task o[:name] do
+        Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f}
+        Lax.after &Output::DOTS
+        ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}.call Lax.select(&:assertion).map(&:new)
       end
-      task o[:name] => ["#{o[:name]}:load", "#{o[:name]}:run"]
     end
   end
 

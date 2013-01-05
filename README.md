@@ -12,12 +12,12 @@ Lax.assert do
   that { number + 1 == 2 }
   that { string.downcase =~ regexp }
 
-  before { puts "i will be run once for each assert block in my scope" }
-  after  { puts "stackable" }
+  before { puts "i am a callback" }
+  after  { puts "are stackable!" }
 
   assert do
-    before { puts "i am a callback" }
-    after  { puts "callbacks are also" }
+    before { puts "i will be run once for each assert block in my scope" }
+    after  { puts "callbacks also" }
     before { @qqq=9 }
 
     def number_is_even
