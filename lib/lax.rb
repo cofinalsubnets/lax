@@ -46,6 +46,7 @@ class Lax < Struct.new(:pass, :exception)
     def fix(hash)
       Struct.new(*hash.keys).new(*hash.values)
     end
+    alias condition_group define_singleton_method
   end
 
   def self.inherited(ling)
