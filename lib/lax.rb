@@ -1,21 +1,10 @@
 class Lax < Struct.new(:pass, :exception)
   VERSION = '0.2.4'
-  @lings  = []
-
-  extend Enumerable
-  def self.inherited(ling)
-    @lings << ling
-    ling.lings = []
-  end
 
   class << self
     attr_accessor :lings, :assertion
     def assert(&b)
-      Class.new(self, &b)    
-    end
-
-    def fix(hash)
-      Struct.new(*hash.keys).new *hash.values 
+      Class.new(self, &b)
     end
 
     def let(name, &defn)
@@ -43,27 +32,40 @@ class Lax < Struct.new(:pass, :exception)
       end }.call instance_method :after
     end
 
-    def that(&spec)
-      assert { include Assertion.new(spec) }
-    end
-
     def each(&b)
       yield self
       lings.each {|ling| ling.each(&b)}
     end
 
     def condition(name, &cond)
-      define_singleton_method(name) do |&blk|
-        assert { include Assertion.new(proc {cond.call blk.call}, cond.source_location) }
+      define_singleton_method(name) do |*as,&blk|
+        assert { include Assertion.new(proc {cond.call *as, instance_eval(&blk)}, blk.source_location) }
       end
+    end
+
+    def fix(hash)
+      Struct.new(*hash.keys).new(*hash.values)
     end
   end
 
+  def self.inherited(ling)
+    @lings << ling
+    ling.lings = []
+  end
+
+  extend Enumerable
+  condition(:that) {|n| n}
+  @lings = []
+
   def before; end
-  def after; end
+  def after;  end
+
+  def fix(h)
+    self.class.fix h
+  end
 
   class Assertion < Module
-    def initialize(spec, src = spec.source_location) 
+    def initialize(spec, src) 
       define_singleton_method(:included) {|k| k.assertion = self }
       define_method(:source) {src}
       define_method :initialize do

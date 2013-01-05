@@ -21,13 +21,6 @@ describe Lax do
     end
   end
 
-  describe '::fix' do
-    subject { Lax.fix class: String, upcase: 'QWER' }
-    its(:class)  { should be String }
-    its(:upcase) { should == 'QWER' }
-    it { should be_a_kind_of Struct }
-  end
-
   describe '#initialize' do
     context 'when the class has no included assertion' do
       subject { lax.new }

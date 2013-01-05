@@ -51,8 +51,8 @@ Lax.assert do
   end
 
   assert do
-    let lax: self,
-        open_file: fix(read: "data\nof\nimmediate\ninterest ") # fixtures
+    let lax: self
+    let(:open_file) {fix read: "data\nof\nimmediate\ninterest "} # fixtures
     that { lax.respond_to?(:bool) == false }# bool is out of scope
     that { open_file.read.lines.map(&:strip).size == 4 }
   end
