@@ -2,7 +2,7 @@ Lax.assert do
   let number: 1,
       string: 'asdf',
       symbol: :a_sym,
-      regexp: lazy{/asd/}
+      regexp: /asd/
 
   assert do
     that { number == 1 }
@@ -18,8 +18,9 @@ end
 
 Lax.assert do
   let number: 1,
-      string: 'Hi There',
-      regexp: lazy{ /the/ } # lazy evaluation
+      string: 'Hi There'
+  
+  let(:regexp) { /the/ } # lazy evaluation
 
   that { string.upcase == 'HI THERE' }
 

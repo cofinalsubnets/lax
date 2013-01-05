@@ -4,13 +4,28 @@ describe Lax do
   let(:lax) { Class.new(Lax) }
 
   describe '::let' do
-    before  { lax.let number: 1 }
-    describe 'the receiver' do
-      subject { lax }
+    subject { lax }
+    shared_examples_for 'creating the correct methods' do
       its(:methods) { should include :number }
       its(:instance_methods) { should include :number }
       its(:number) { should == 1 }
+      specify { subject.new.number.should == 1 }
     end
+    context 'when called with a hash' do
+      before  { lax.let number: 1 }
+      it_behaves_like 'creating the correct methods'
+    end
+    context 'when called with a symbol and block' do
+      before { lax.let(:number) {1} }
+      it_behaves_like 'creating the correct methods'
+    end
+  end
+
+  describe '::fix' do
+    subject { Lax.fix class: String, upcase: 'QWER' }
+    its(:class)  { should be String }
+    its(:upcase) { should == 'QWER' }
+    it { should be_a_kind_of Struct }
   end
 
   describe '#initialize' do

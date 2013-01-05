@@ -1,11 +1,11 @@
 lax
 ===
-Lax is an insouciant smidgen of a testing framework that tries hard to be an invisible wrapper around your ideas about how your code works.
+Lax is an insouciant smidgen of a testing library that tries to provide as much familiar functionality as possible without exceeding 100 SLOC.
 ```ruby
 Lax.assert do
   let number: 1,
       string: 'Hi There',
-      regexp: lazy{ /the/ } # lazy evaluation
+  let(:regexp) { /the/ } # RSpec-like syntax for non-strict evaluation
 
   that { string.upcase == 'HI THERE' }
 
@@ -13,7 +13,7 @@ Lax.assert do
   that { string.downcase =~ regexp }
 
   before { puts "i am a callback" }
-  after  { puts "are stackable!" }
+  after  { puts "are stackable" }
 
   assert do
     before { puts "i will be run once for each assert block in my scope" }
@@ -45,8 +45,8 @@ end
 ```
 how come lax is neat
 --------------------
-* Minimal legalese.
-* Tiny & hackable (< 100 SLOC !!)
+* Minimal legalese
+* Tiny & hackable
 * Built-in Rake task generator for quick setup.
 * Does not work by infecting the entire object system with its code - neighbourly!
 

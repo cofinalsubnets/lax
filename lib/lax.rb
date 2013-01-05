@@ -1,6 +1,5 @@
 class Lax < Struct.new(:pass, :exception)
   VERSION = '0.2.4'
-  Lazy    = Class.new Proc
   @lings  = []
 
   extend Enumerable
@@ -11,10 +10,6 @@ class Lax < Struct.new(:pass, :exception)
 
   class << self
     attr_accessor :lings, :assertion
-    def lazy
-      Lazy.new   
-    end
-
     def assert(&b)
       Class.new(self, &b)    
     end
@@ -23,12 +18,13 @@ class Lax < Struct.new(:pass, :exception)
       Struct.new(*hash.keys).new *hash.values 
     end
 
-    def let(h)
-      h.each do |key, value|
-        val = (Lazy===value) ? value : lazy{value}
-        define_singleton_method(key, val)
-        define_method(key) do
-          (@_memo||={}).has_key?(key)? @_memo[key] : @_memo[key] = val.call
+    def let(name, &defn)
+      if name.is_a? Hash
+        name.each {|k,v| let(k) {v}}
+      else
+        define_singleton_method(name, defn)
+        define_method(name) do
+          (@_memo||={}).has_key?(name)? @_memo[name] : @_memo[name] = defn.call
         end
       end
     end
@@ -48,21 +44,28 @@ class Lax < Struct.new(:pass, :exception)
     end
 
     def that(&spec)
-      assert { include @assertion = Assertion.new(spec) }
+      assert { include Assertion.new(spec) }
     end
 
     def each(&b)
       yield self
       lings.each {|ling| ling.each(&b)}
     end
+
+    def condition(name, &cond)
+      define_singleton_method(name) do |&blk|
+        assert { include Assertion.new(proc {cond.call blk.call}, cond.source_location) }
+      end
+    end
   end
 
   def before; end
-  def after;  end
+  def after; end
 
   class Assertion < Module
-    def initialize(spec)
-      define_method(:source) { spec.source_location }
+    def initialize(spec, src = spec.source_location) 
+      define_singleton_method(:included) {|k| k.assertion = self }
+      define_method(:source) {src}
       define_method :initialize do
         before
         begin
