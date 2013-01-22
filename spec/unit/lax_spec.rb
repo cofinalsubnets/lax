@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Lax do
-  let(:lax) { Class.new(Lax) }
+  let(:lax) { Class.new Lax }
 
   describe '::let' do
     subject { lax }
@@ -9,7 +9,7 @@ describe Lax do
       its(:methods) { should include :number }
       its(:instance_methods) { should include :number }
       its(:number) { should == 1 }
-      specify { subject.new.number.should == 1 }
+      specify { lax.new('').number.should == 1 }
     end
     context 'when called with a hash' do
       before  { lax.let number: 1 }
@@ -22,59 +22,46 @@ describe Lax do
   end
 
   describe '#initialize' do
-    context 'when the class has no included assertion' do
-      subject { lax.new }
-      it { should_not pass }
-      it { should_not have_an_exception }
-      specify { lax.should_not run_callbacks }
-    end
 
     context 'when the class has an included assertion' do
+      subject { Lax::TESTS.last }
       context 'and the assertion passes' do
-        let(:assertion) { lax.that { 'asdf' =~ /a/ } }
-        subject { assertion.new }
+        before { lax.assert { 'asdf' =~ /a/ } }
         it { should pass }
         it { should_not have_an_exception }
-        specify { assertion.should run_callbacks }
+        it { should run_callbacks }
       end
       context 'and the assertion fails' do
-        let(:assertion) { lax.that { 1 == :one } }
-        subject { assertion.new }
+        before { lax.assert { 1 == 2 } }
         it { should fail }
         it { should_not have_an_exception }
-        specify { assertion.should run_callbacks }
+        it { should run_callbacks }
       end
       context 'and the assertion raises an exception' do
-        let(:assertion) { lax.that { 1/0 == Math::PI } }
-        subject { assertion.new }
+        before { lax.assert { 1/0 == Math::PI } }
         it { should fail }
         it { should have_an_exception ZeroDivisionError }
-        specify { assertion.should run_callbacks }
+        it { should run_callbacks }
       end
       context 'and a callback raises an exception' do
-        let :bad_assertion do
-          lax.assert do
-            before { NameError::Right::Here }
-            that { 'lalala' }
-          end.lings.first
+        before do
+          lax.before { NameError::Right::Here }
+          lax.assert {true}
         end
-        specify { ->{bad_assertion.new}.should raise_error }
+        specify { ->{subject.run}.should_not raise_error }
       end
     end
   end
 
-  describe '::assert' do
-    let :assertion_group do
-      Lax.assert do
+  describe '::scope' do
+    let :scope do
+      lax.scope do
         let number: 22
-        that { number == 22 }
+        assert { number == 22 }
       end
     end
     it 'should return a subclass of the receiver' do
-      assertion_group.superclass.should be Lax
-    end
-    describe 'the receiver' do
-      specify { Lax.lings.should include assertion_group }
+      scope.superclass.should be lax
     end
   end
 end

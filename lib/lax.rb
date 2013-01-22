@@ -1,9 +1,10 @@
-class Lax < Struct.new(:pass, :exception)
+class Lax
   VERSION = '0.2.4'
+  TESTS   = []
+  attr_reader :pass, :exception, :source
 
   class << self
-    attr_accessor :lings, :assertion
-    def assert(&b)
+    def scope(&b)
       Class.new(self, &b)
     end
 
@@ -13,34 +14,44 @@ class Lax < Struct.new(:pass, :exception)
       else
         define_singleton_method(name, defn)
         define_method(name) do
-          (@_memo||={}).has_key?(name)? @_memo[name] : @_memo[name] = defn.call
+          @__memo__.has_key?(name)? @__memo__[name] : @__memo__[name] = defn.call
         end
       end
     end
 
     def before(&bef)
-      ->(m) { define_method :before do
-        m.bind(self).call
+      mtd = instance_method :before
+      define_method :before do
+        mtd.bind(self).call
         instance_exec &bef
-      end }.call instance_method :before
+      end
     end
 
     def after(&aft)
-      ->(m) { define_method :after do
+      mtd = instance_method :after
+      define_method :after do
         instance_exec &aft
-        m.bind(self).call
-      end }.call instance_method :after
-    end
-
-    def each(&b)
-      yield self
-      lings.each {|ling| ling.each(&b)}
+        mtd.bind(self).call
+      end
     end
 
     def condition(name, &cond)
       define_singleton_method(name) do |*as,&blk|
-        assert { include Assertion.new(proc {cond.call *as, instance_eval(&blk)}, blk.source_location) }
+        new(blk.source_location) {cond.call *as, instance_eval(&blk)}
       end
+    end
+
+    def load(files)
+      [*files].each do |file|
+        File.open file, 'r' do |f|
+          scope { class_eval f.read, file }
+        end
+      end
+      self
+    end
+
+    def run
+      TESTS.each &:run
     end
 
     def fix(hash)
@@ -49,36 +60,28 @@ class Lax < Struct.new(:pass, :exception)
     alias condition_group define_singleton_method
   end
 
-  def self.inherited(ling)
-    @lings << ling
-    ling.lings = []
+  def fix(hash)
+    Lax.fix hash
   end
 
-  extend Enumerable
-  condition(:that) {|n| n}
-  @lings = []
+  condition(:assert) {|n|  n}
+  condition(:refute) {|n| !n}
 
   def before; end
   def after;  end
 
-  def fix(h)
-    self.class.fix h
+  def initialize(source, &test)
+    @test, @__memo__, @source = test, {}, source
+    TESTS << self
   end
 
-  class Assertion < Module
-    def initialize(spec, src) 
-      define_singleton_method(:included) {|k| k.assertion = self }
-      define_method(:source) {src}
-      define_method :initialize do
-        before
-        begin
-          self.pass = instance_eval(&spec)
-        rescue => e
-          self.exception = e
-        end
-        after
-      end
-    end
+  def run
+    before
+    @pass = instance_eval &@test
+  rescue => e
+    @exception = e
+  ensure
+    after
   end
 
   module RakeTask
@@ -87,22 +90,24 @@ class Lax < Struct.new(:pass, :exception)
       extend Rake::DSL
       o = {dir: :test, name: :lax}.merge(opts)
       task o[:name] do
-        Dir["./#{o[:dir]}/**/*.rb"].each {|f| load f}
-        Lax.after &Output::DOTS
-        ->(n){Output::FAILURES[n]; Output::SUMMARY[n]}.call Lax.select(&:assertion).map(&:new)
+        Lax.after {Output.dots self}
+        Output.summarize Lax.load(Dir["./#{o[:dir]}/**/*.rb"]).run
       end
     end
   end
 
   module Output
-    DOTS     = ->{print pass ? "\x1b[32m.\x1b[0m" : "\x1b[31mX\x1b[0m"}
-    SUMMARY  = ->(cs) {puts "pass: #{cs.select(&:pass).size}\nfail: #{cs.reject(&:pass).size}"}
-    FAILURES = ->(cs) do
+    def self.dots(c)
+      print c.pass ? "\x1b[32m.\x1b[0m" : "\x1b[31mX\x1b[0m"
+    end
+
+    def self.summarize(cs)
       puts
       cs.reject(&:pass).each do |f|
         puts "  failure at #{f.source*?:}"
         puts "    raised #{f.exception.class} : #{f.exception.message}" if f.exception
       end
+      puts "pass: #{cs.select(&:pass).size}\nfail: #{cs.reject(&:pass).size}"
     end
   end
 end

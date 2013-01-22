@@ -11,22 +11,36 @@ RSpec::Matchers.define :be_an_assertion_group do
 end
 
 RSpec::Matchers.define :have_an_exception do |xptn=StandardError|
-  match { |lax| lax.exception.is_a?(xptn) }
+  match do |lax|
+    lax.run
+    lax.exception.is_a?(xptn)
+  end
 end
 
 RSpec::Matchers.define :pass do
-  match { |lax| lax.pass }
+  match do |lax|
+    lax.run
+    lax.pass
+  end
 end
 
 RSpec::Matchers.define :fail do
-  match { |lax| !lax.pass }
+  match do |lax|
+    lax.run
+    !lax.pass
+  end
 end
 
 RSpec::Matchers.define :run_callbacks do
   match do |lax|
-    lax.before { @num = 0 }
-    lax.after  { @num += 1 }
-    lax.new.instance_variable_get(:@num) == 1
+    def lax.before
+      @a=1
+    end
+    def lax.after
+      @a+=1
+    end
+    lax.run
+    lax.instance_variable_get(:@a).should == 2
   end
 end
 
