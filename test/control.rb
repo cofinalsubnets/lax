@@ -5,7 +5,7 @@ let number: 1,
 
 assert { number == 1 }
 
-scope do
+scope 'a scope' do
   let number: 2
 
   assert { number == 2 }
@@ -35,7 +35,7 @@ scope do
         bool:    true
 
     condition(:divides) {|n,d| n%d==0} # custom conditions
-    condition_group(:even_multiple_of_five) do |n| # like "shared examples" in RSpec
+    macro :even_multiple_of_five do |n| # like "shared examples" in RSpec
       assert { n.even? }
       divides(n) {5}
     end

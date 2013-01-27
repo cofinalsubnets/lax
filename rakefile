@@ -6,6 +6,5 @@ require 'pry'
 RSpec::Core::RakeTask.new 'spec'
 #Lax.after &->(c) {c.pass? || binding.pry}
 #Lax.start {|as| binding.pry}
-
 task default: Lax::RakeTask.new
 

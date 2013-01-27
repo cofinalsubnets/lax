@@ -1,10 +1,11 @@
 require 'spec_helper'
 
 describe 'callbacks' do
-  let(:lax)  { Class.new Lax }
-  let(:test) { Lax::TESTS.last }
+  let(:lax) { Lax.new }
+  let(:context) { lax.context }
+  let(:results) { lax.run }
   before do
-    lax.scope do
+    context.scope do
       before { @array = [1] }
       after  { @array << 4  }
       scope do
@@ -13,11 +14,10 @@ describe 'callbacks' do
         after  { @array << 3 }
       end
     end
-    test.run
   end
 
   it 'should be executed in the correct order' do
-    test.instance_variable_get(:@array).should == [1,2,3,4]
+    results.last.instance_variable_get(:@array).should == [1,2,3,4]
   end
 end
 
