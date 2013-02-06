@@ -3,15 +3,17 @@ let number: 1,
     symbol: :a_sym,
     regexp: /asd/
 
-assert { number == 1 }
+assert { that(number) == 1 }
 
-scope 'a scope' do
+scope do
   let number: 2
 
-  assert { number == 2 }
-  refute { number.odd? }
-  refute { string.upcase == 'asdf' }
-  assert { string =~ regexp }
+  assert do
+    assert_equal number, 2
+    refute number.odd?
+    assert string =~ regexp
+    assert string.upcase != 'asdf'
+  end
 end
 
 scope do
@@ -19,9 +21,9 @@ scope do
       string: 'Hi There'
   let(:regexp) { /the/ } # lazy evaluation
 
-  assert { string.upcase == 'HI THERE' }
-  assert { number == 1 }
-  assert { string.downcase =~ regexp }
+  assert { that(string.upcase)   == 'HI THERE' }
+  assert { that(number)          == 1          }
+  assert { that(string.downcase) =~ regexp     }
 
 #  before { puts "i will be run once for each assert block in my scope" }
 #  after  { puts "stackable" }
@@ -34,25 +36,22 @@ scope do
         nothing: regexp.match('ffff'),
         bool:    true
 
-    condition(:divides) {|n,d| n%d==0} # custom conditions
-    macro :even_multiple_of_five do |n| # like "shared examples" in RSpec
-      assert { n.even? }
-      divides(n) {5}
+    assert do
+      assert_equal @qqq, 9  # callbacks and assertions are evaluated in the same context
+      assert_equal number - 1, 1
+      assert_equal string.upcase, 'HI THERE' # string is still in scope
+      assert nothing.nil?
     end
-
-    even_multiple_of_five 30
-    assert { @qqq == 9 } # callbacks and assertions are evaluated in the same context
-    assert { number - 1 == 1 }
-    assert { string.upcase == 'HI THERE' } # string is still in scope
-    assert { nothing.nil? }
   end
 
   scope do
     let lax:       self,
         open_file: fix(read: "data\nof\nimmediate\ninterest ") # built-in fixtures
 
-    refute { lax.respond_to?(:bool) }# bool is now out of scope
-    assert { open_file.read.lines.map(&:strip).size == 4 }
+    assert do
+      refute lax.respond_to?(:bool) # bool is now out of scope
+      assert_equal open_file.read.lines.map(&:strip).size, 4
+    end
   end
 end
 

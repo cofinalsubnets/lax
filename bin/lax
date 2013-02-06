@@ -1,10 +1,5 @@
 #!/usr/bin/env ruby
 require 'lax'
 
-Lax.configure do |c|
-  c.after  = Lax::Output.method :dots
-  c.finish = Lax::Output.method :summarize
-end
-Lax.load ARGV
-Lax.run
+Lax.run ARGV
 
