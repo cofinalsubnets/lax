@@ -1,81 +1,80 @@
 lax
 ===
-Lax is an insouciant smidgen of a testing library that tries to provide as much familiar functionality as possible without exceeding ~~100~~ a couple hundred SLOC.
+Lax is an insouciant smidgen of a testing library that adds some optional RSpec-style glitz and glam to MiniTest. Lax aims to be as painless as possible to use, on the principle that an imperfectly-rigorous approach to testing is preferable to no testing at all.
 ```ruby
-let number: 1,
+let number: 1,      # bindings visible in tests
     string: 'asdf',
     symbol: :a_sym,
     regexp: /asd/
 
-assert { number == 1 }
+assert { number == 1 } # short syntax
 
-scope 'a named scope' do
-  let number: 2
+group "some nested tests" do
+  let number: 2     # bindings can be overridden in nested scopes
 
-  assert { number == 2 }
-  refute { number.odd? }
-  refute { string.upcase == 'asdf' }
-  assert { string =~ regexp }
+  test "that the world makes sense :/" do
+    assert_equal number, 2   # normal MiniTest syntax is still available
+    refute number.odd?
+    assert string =~ regexp
+    assert string.upcase != 'asdf'
+  end
 end
 
-scope do
+group do
   let number: 1,
       string: 'Hi There'
-  let(:regexp) { /the/ } # alternate syntax for lazy evaluation
+  let(:regexp) { /the/ } # lazy evaluation
 
-  assert { string.upcase == 'HI THERE' }
-  assert { number == 1 }
-  assert { string.downcase =~ regexp }
+  assert { string.upcase   == 'HI THERE' }
+  assert { number          == 1          }
+  assert { string.downcase =~ regexp     }
 
-  before { puts "i will be run once for each assert block in my scope" }
+
+  before { puts "i am a callback" }
   after  { puts "stackable" }
 
-  scope do
-    before { puts "i am a callback" }
+  group do
+    before { puts "i will be run once for each assert block in my scope" }
     after  { puts "callbacks are also" }
     before { @qqq=9 }
+
     let number:  2,
         nothing: regexp.match('ffff'),
         bool:    true
 
-    condition(:divides) {|n,d| n%d==0} # custom conditions
-    macro :even_multiple_of_five do |n| # like "shared examples" in RSpec
-      assert { n.even? }
-      divides(n) {5}
+    test do # names are optional
+      assert_equal @qqq, 9  # callbacks and assertions are evaluated in the same context
+      assert_equal number - 1, 1
+      assert_equal string.upcase, 'HI THERE' # string is still in scope
+      assert nothing.nil?
     end
-
-    even_multiple_of_five 30
-    assert { @qqq == 9 } # callbacks and assertions are evaluated in the same context
-    assert { number - 1 == 1 }
-    assert { string.upcase == 'HI THERE' } # string is still in scope
-    assert { nothing.nil? }
   end
 
-  scope do
+  group do
     let lax:       self,
         open_file: fix(read: "data\nof\nimmediate\ninterest ") # built-in fixtures
 
-    refute { lax.respond_to?(:bool) }# bool is now out of scope
-    assert { open_file.read.lines.map(&:strip).size == 4 }
+    test do
+      refute lax.respond_to?(:bool) # bool is now out of scope
+      assert_equal open_file.read.lines.map(&:strip).size, 4
+    end
   end
 end
+
 ```
 how come lax is neat
 --------------------
-* Minimal legalese
 * Tiny & hackable
-* Rake task generator for quick setup
-* Support for concurrent testing (innately via threads, but separate processes are easy too)
+* Minimal setup & legalese
+* Output format is trivial to customize
 * Does not work by infecting the entire object system with its code - neighbourly!
 
-how to make it do it
---------------------
-```shell
-  gem install lax
-  cd my/project/root
-  echo "require 'lax/rake_task'; Lax::RakeTask.new" >> Rakefile
-  # write tests in yr test directory (defaults to 'lax')
-  rake lax
+do it w/ rake
+-------------
+```ruby
+require 'lax'
+task(:lax) { Lax.run Dir['./my/test/directory/*.rb'] }
+# boom done start hacking
 ```
 
 license

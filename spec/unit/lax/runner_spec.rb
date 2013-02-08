@@ -12,7 +12,7 @@ describe Lax::RUNNER do
 
     before do
       @count = 0
-      Lax::Test.stub(:execute).with(files).and_return results
+      Lax.stub(:lazy_execute).with(files).and_return results
       runner.call files
     end
 

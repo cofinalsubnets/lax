@@ -1,6 +1,6 @@
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 require 'rake'
-require 'lax/version'
+require 'lax'
 
 Gem::Specification.new do |spec|
   spec.name        = 'lax'
@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.license     = 'MIT/X11'
   spec.homepage    = 'http://github.com/gwentacle/lax'
   spec.summary     = 'An insouciant smidgen of a testing framework.'
-  spec.description = 'A lightweight testing framework.'
+  spec.description = 'A thin wrapper around MiniTest for writing fast & friendly tests.'
   spec.add_development_dependency 'rspec'
 end
+
